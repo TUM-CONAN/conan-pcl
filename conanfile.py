@@ -31,6 +31,9 @@ class LibPCLConan(ConanFile):
     build_subfolder = "build_subfolder"
     short_paths = True
 
+    def configure(self):
+        del self.settings.compiler.libcxx
+
     def requirements(self):
         self.requires("qt/5.11.1@fw4spl/stable")
         self.requires("eigen/3.3.4@fw4spl/stable")
