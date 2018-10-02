@@ -123,6 +123,9 @@ class LibPCLConan(ConanFile):
             cmake.definitions["CUDA_HOST_COMPILER"] = "/usr/bin/gcc"
             cmake.definitions["CUDA_PROPAGATE_HOST_FLAGS"] = "OFF"
 
+        if not tools.os_info.is_windows:
+            cmake.definitions["CMAKE_POSITION_INDEPENDENT_CODE"] = "ON"
+
         cmake.configure(build_folder=self.build_subfolder)
         cmake.build()
         cmake.install()
