@@ -1,9 +1,19 @@
 from conan.packager import ConanMultiPackager
+import os
 
 if __name__ == "__main__":
     builder = ConanMultiPackager(
-        username="fw4spl", 
+        username="sight", 
         visual_runtimes=["MD", "MDd"],
         archs=["x86_64"])
-    builder.add_common_builds(shared_option_name=False, pure_c=True)
+    if os.getenv("CONAN_USE_CUDA", False):
+        builder.add({"arch": "x86_64", "build_type": "Debug"},
+                    {"pcl:shared": True, "pcl:use_cuda": True})
+        builder.add({"arch": "x86_64", "build_type": "Release"},
+                    {"pcl:shared": True, "pcl:use_cuda": True})
+    else:
+        builder.add({"arch": "x86_64", "build_type": "Debug"},
+                    {"pcl:shared": True, "pcl:use_cuda": False})
+        builder.add({"arch": "x86_64", "build_type": "Release"},
+                    {"pcl:shared": True, "pcl:use_cuda": False})
     builder.run()

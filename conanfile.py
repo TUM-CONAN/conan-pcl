@@ -35,19 +35,19 @@ class LibPCLConan(ConanFile):
         del self.settings.compiler.libcxx
 
     def requirements(self):
-        self.requires("qt/5.11.1@fw4spl/stable")
-        self.requires("eigen/3.3.4@fw4spl/stable")
-        self.requires("boost/1.67.0@fw4spl/stable")
-        self.requires("qt/5.11.1@fw4spl/stable")
-        self.requires("vtk/8.0.1@fw4spl/stable")
-        self.requires("openni/2.2.0-rev-958951f@fw4spl/stable")
-        self.requires("flann/1.9.1@fw4spl/stable")
+        self.requires("qt/5.11.1@sight/stable")
+        self.requires("eigen/3.3.4@sight/stable")
+        self.requires("boost/1.67.0@sight/stable")
+        self.requires("qt/5.11.1@sight/stable")
+        self.requires("vtk/8.0.1@sight/stable")
+        self.requires("openni/2.2.0-rev-958951f@sight/stable")
+        self.requires("flann/1.9.1@sight/stable")
 
         if not tools.os_info.is_linux:
-            self.requires("zlib/1.2.11@fw4spl/stable")
+            self.requires("zlib/1.2.11@sight/stable")
 
     def system_requirements(self):
-        if tools.os_info.linux_distro == "ubuntu":
+        if tools.os_info.linux_distro == "linuxmint":
             pack_names = [
                 "zlib1g-dev"
             ]

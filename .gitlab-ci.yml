@@ -1,18 +1,17 @@
 variables:
   CONAN_REFERENCE: "pcl/1.8.1-rev-9dae1ea"
-  CONAN_USERNAME: "fw4spl"
-  CONAN_LOGIN_USERNAME: "fw4spl"
+  CONAN_USERNAME: "sigth"
+  CONAN_LOGIN_USERNAME: "sight"
   CONAN_CHANNEL: "stable"
-  CONAN_UPLOAD: "http://5.39.78.163:8081/artifactory/api/conan/conan-local"
   CONAN_STABLE_BRANCH_PATTERN: "stable/*"
-  CONAN_UPLOAD_ONLY_WHEN_STABLE: 1 # Will only upload when the branch matches "stable/*"
-  CONAN_DOCKER_32_IMAGES: 1
+  CONAN_UPLOAD_ONLY_WHEN_STABLE: 1
+  CONAN_ARCHS: x86_64
 
 stages:
   - build
 
 msvc2015:
-  image: greenjava/vcbuild2015:1.0
+  image: registry.lan.local:5000/docker-envdev-msvc2015:dev
   stage: build
   script:
     - python build.py
@@ -21,7 +20,7 @@ msvc2015:
     - windows
 
 msvc2017:
-  image: greenjava/vcbuild2017:1.0
+  image: registry.lan.local:5000/docker-envdev-msvc2017:dev
   stage: build
   script:
     - python build.py
@@ -29,42 +28,46 @@ msvc2017:
     - docker
     - windows
 
-.conan-template: &conan-template
-  stage: build
-  before_script:
-    # Upgrade Conan version
-    - sudo pip install --upgrade conan
-    - sudo pip install conan_package_tools
-    - conan user
-  script:
-    - python build.py
-
-gcc-6:
-  image: lasote/conangcc6
-  variables:
-      CONAN_GCC_VERSIONS: "6"
-  <<: *conan-template
-
 gcc-7:
-  image: lasote/conangcc7
+  image: registry.lan.local:5000/docker-envdev:dev
+  stage: build
   variables:
-      CONAN_GCC_VERSIONS: "7"
-  <<: *conan-template
+    CONAN_GCC_VERSIONS: "7"
+    CONAN_USE_CUDA: "False"
+  script:
+    - export CC=/usr/bin/gcc-7
+    - export CXX=/usr/bin/g++-7
+    - python3 build.py
 
-gcc-8:
-  image: lasote/conangcc8
+gcc-7-cuda:
+  image: registry.lan.local:5000/docker-envdev:dev
+  stage: build
   variables:
-      CONAN_GCC_VERSIONS: "8"
-  <<: *conan-template
-
-clang-5:
-  image: lasote/conanclang50
-  variables:
-      CONAN_CLANG_VERSIONS: "5.0"
-  <<: *conan-template
+    CONAN_GCC_VERSIONS: "7"
+    CONAN_USE_CUDA: "True"
+  script:
+    - export CC=/usr/bin/gcc-7
+    - export CXX=/usr/bin/g++-7
+    - python3 build.py
 
 clang-6:
-  image: lasote/conanclang60
+  image: registry.lan.local:5000/docker-envdev:dev
+  stage: build
   variables:
-      CONAN_CLANG_VERSIONS: "6.0"
-  <<: *conan-template
+    CONAN_CLANG_VERSIONS: "6.0"
+    CONAN_USE_CUDA: "False"
+  script:
+    - export CC=/usr/bin/clang-6.0
+    - export CXX=/usr/bin/clang++-6.0
+    - python3 build.py
+
+clang-6-cuda:
+  image: registry.lan.local:5000/docker-envdev:dev
+  stage: build
+  variables:
+    CONAN_CLANG_VERSIONS: "6.0"
+    CONAN_USE_CUDA: "True"
+  script:
+    - export CC=/usr/bin/clang-6.0
+    - export CXX=/usr/bin/clang++-6.0
+    - python3 build.py
