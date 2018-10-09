@@ -11,21 +11,51 @@ stages:
   - build
 
 msvc2015:
-  image: registry.lan.local:5000/docker-envdev-msvc2015:dev
   stage: build
+  variables:
+    CONAN_VISUAL_VERSIONS: "14"
+    CONAN_USER_HOME: $CI_PROJECT_DIR
+    CONAN_USE_CUDA: "False"
   script:
     - python build.py
   tags:
-    - docker
+    - shell
+    - windows
+
+msvc2015-cuda:
+  stage: build
+  variables:
+    CONAN_VISUAL_VERSIONS: "14"
+    CONAN_USER_HOME: $CI_PROJECT_DIR
+    CONAN_USE_CUDA: "True"
+  script:
+    - python build.py
+  tags:
+    - shell
     - windows
 
 msvc2017:
-  image: registry.lan.local:5000/docker-envdev-msvc2017:dev
   stage: build
+  variables:
+    CONAN_VISUAL_VERSIONS: "15"
+    CONAN_USER_HOME: $CI_PROJECT_DIR
+    CONAN_USE_CUDA: "False"
   script:
     - python build.py
   tags:
-    - docker
+    - shell
+    - windows
+
+msvc2017-cuda:
+  stage: build
+  variables:
+    CONAN_VISUAL_VERSIONS: "15"
+    CONAN_USER_HOME: $CI_PROJECT_DIR
+    CONAN_USE_CUDA: "True"
+  script:
+    - python build.py
+  tags:
+    - shell
     - windows
 
 gcc-7:
