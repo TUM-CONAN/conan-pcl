@@ -112,6 +112,7 @@ class LibPCLConan(ConanFile):
             cmake.definitions["BUILD_gpu_kinfu_large_scale"] = "ON"
             cmake.definitions["BUILD_visualization"] = "ON"
             cmake.definitions["BUILD_surface"] = "ON"
+            cmake.definitions["CUDA_ARCH_BIN"] = "5.0 5.2 6.0 6.1"
 
         if tools.os_info.is_macos:
             cmake.definitions["BUILD_gpu_features"] = "OFF"
