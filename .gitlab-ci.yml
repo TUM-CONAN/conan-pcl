@@ -6,6 +6,7 @@ variables:
   CONAN_STABLE_BRANCH_PATTERN: "stable/*"
   CONAN_UPLOAD_ONLY_WHEN_STABLE: 1
   CONAN_ARCHS: x86_64
+  CONAN_CPU_COUNT: 4
 
 stages:
   - build
@@ -59,7 +60,7 @@ msvc2017-cuda:
     - windows
 
 gcc-7:
-  image: registry.lan.local:5000/docker-envdev:dev
+  image: registry.lan.local:5000/docker-envdev-gcc7:dev
   stage: build
   variables:
     CONAN_GCC_VERSIONS: "7"
@@ -70,7 +71,7 @@ gcc-7:
     - python3 build.py
 
 gcc-7-cuda:
-  image: registry.lan.local:5000/docker-envdev:dev
+  image: registry.lan.local:5000/docker-envdev-gcc7:dev
   stage: build
   variables:
     CONAN_GCC_VERSIONS: "7"
@@ -81,7 +82,7 @@ gcc-7-cuda:
     - python3 build.py
 
 clang-6:
-  image: registry.lan.local:5000/docker-envdev:dev
+  image: registry.lan.local:5000/docker-envdev-clang6:dev
   stage: build
   variables:
     CONAN_CLANG_VERSIONS: "6.0"
@@ -92,7 +93,7 @@ clang-6:
     - python3 build.py
 
 clang-6-cuda:
-  image: registry.lan.local:5000/docker-envdev:dev
+  image: registry.lan.local:5000/docker-envdev-clang6:dev
   stage: build
   variables:
     CONAN_CLANG_VERSIONS: "6.0"
