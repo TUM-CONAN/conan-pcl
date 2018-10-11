@@ -10,7 +10,7 @@ if __name__ == "__main__":
     filtered_builds = []
     use_cuda = (os.getenv("CONAN_USE_CUDA", "False") == "True")
     for settings, options, env_vars, build_requires, reference in builder.items:
-        options["pcl:use_cuda"] = use_cuda
+        options["use_cuda"] = use_cuda
         filtered_builds.append([settings, options, env_vars, build_requires])
     builder.builds = filtered_builds
     builder.run()
