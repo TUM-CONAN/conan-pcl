@@ -5,7 +5,7 @@ import shutil
 
 class LibPCLConan(ConanFile):
     name = "pcl"
-    version = "1.8.1-rev-9dae1ea"
+    version = "1.8.1-r1"
     generators = "cmake"
     settings = "os", "arch", "compiler", "build_type"
     options = {
@@ -35,11 +35,10 @@ class LibPCLConan(ConanFile):
         del self.settings.compiler.libcxx
 
     def requirements(self):
-        self.requires("qt/5.11.1@sight/stable")
+        self.requires("qt/5.11.2@sight/stable")
         self.requires("eigen/3.3.4@sight/stable")
         self.requires("boost/1.67.0@sight/stable")
-        self.requires("qt/5.11.1@sight/stable")
-        self.requires("vtk/8.0.1@sight/stable")
+        self.requires("vtk/8.0.1-r1@sight/stable")
         self.requires("openni/2.2.0-rev-958951f@sight/stable")
         self.requires("flann/1.9.1@sight/stable")
 
@@ -130,7 +129,6 @@ class LibPCLConan(ConanFile):
         cmake.configure(build_folder=self.build_subfolder)
         cmake.build()
         cmake.install()
-        cmake.patch_config_paths()
 
     def package_info(self):
         self.cpp_info.libs = tools.collect_libs(self)
