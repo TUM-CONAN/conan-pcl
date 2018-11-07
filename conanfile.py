@@ -42,7 +42,7 @@ class LibPCLConan(ConanFile):
         self.requires("openni/2.2.0-rev-958951f@sight/stable")
         self.requires("flann/1.9.1@sight/stable")
 
-        if not tools.os_info.is_linux:
+        if tools.os_info.is_windows:
             self.requires("zlib/1.2.11@sight/stable")
 
     def system_requirements(self):
