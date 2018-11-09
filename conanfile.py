@@ -33,6 +33,8 @@ class LibPCLConan(ConanFile):
 
     def configure(self):
         del self.settings.compiler.libcxx
+        if 'CI' not in os.environ:
+            os.environ["CONAN_SYSREQUIRES_MODE"] = "verify"
 
     def requirements(self):
         self.requires("qt/5.11.2@sight/stable")
@@ -45,14 +47,15 @@ class LibPCLConan(ConanFile):
         if tools.os_info.is_windows:
             self.requires("zlib/1.2.11@sight/stable")
 
+    def build_requirements(self):
+        if tools.os_info.linux_distro == "linuxmint":
+            installer = tools.SystemPackageTool()
+            installer.install("zlib1g-dev")
+
     def system_requirements(self):
         if tools.os_info.linux_distro == "linuxmint":
-            pack_names = [
-                "zlib1g-dev"
-            ]
             installer = tools.SystemPackageTool()
-            installer.update()
-            installer.install(" ".join(pack_names))
+            installer.install("zlib1g")
 
     def source(self):
         rev = "9dae1eaa6750932db23d157cd624ef61ccd5544f"
