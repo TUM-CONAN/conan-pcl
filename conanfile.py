@@ -1,7 +1,9 @@
-from conans import ConanFile, CMake, tools, AutoToolsBuildEnvironment
-from conans.util import files
 import os
 import shutil
+
+from conans import ConanFile, CMake, tools, AutoToolsBuildEnvironment
+from conans.util import files
+
 
 class LibPCLConan(ConanFile):
     name = "pcl"
@@ -25,7 +27,7 @@ class LibPCLConan(ConanFile):
         "patches/pcl_gpu_error.diff"
     ]
     url = "https://gitlab.lan.local/conan/conan-pcl"
-    license="BSD License"
+    license = "BSD License"
     description = "The Point Cloud Library is a standalone, large scale, open project for 2D/3D image and point cloud processing."
     source_subfolder = "source_subfolder"
     build_subfolder = "build_subfolder"
@@ -91,21 +93,12 @@ class LibPCLConan(ConanFile):
         cmake.definitions["WITH_ENSENSO"] = "OFF"
         cmake.definitions["WITH_OPENNI"] = "OFF"
         cmake.definitions["WITH_RSSDK"] = "OFF"
-        cmake.definitions["WITH_QHULL"] = "OFF"       
+        cmake.definitions["WITH_QHULL"] = "OFF"
         cmake.definitions["BUILD_TESTS"] = "OFF"
         cmake.definitions["BUILD_ml"] = "ON"
         cmake.definitions["BUILD_simulation"] = "OFF"
         cmake.definitions["BUILD_segmentation"] = "ON"
         cmake.definitions["BUILD_registration"] = "ON"
-        #cmake.definitions["VTK_DIR"] = self.deps_cpp_info["vtk"].lib_paths[0].replace('\\', '/')
-        #cmake.definitions["ZLIB_INCLUDE_DIR"] = self.deps_cpp_info["zlib"].include_paths[0].replace('\\', '/')
-        #cmake.definitions["CUDA_TOOLKIT_ROOT_DIR"] = ${CUDA_TOOLKIT_ROOT_DIR}
-        #cmake.definitions["BOOST_ROOT"] = ${CMAKE_INSTALL_PREFIX}
-        #cmake.definitions["FLANN_INCLUDE_DIR"] = ${CMAKE_INSTALL_PREFIX}/include/flann
-        #cmake.definitions["PCL_ENABLE_SSE"] = ${ENABLE_SSE_SUPPORT}
-        #cmake.definitions["OPENNI2_INCLUDE_DIRS"] = ${CMAKE_INSTALL_PREFIX}/include/openni2
-        #cmake.definitions["QT_QMAKE_EXECUTABLE"] = ${CMAKE_INSTALL_PREFIX}/bin/qmake
-
 
         if self.options.use_cuda:
             cmake.definitions["BUILD_CUDA"] = "ON"
@@ -133,5 +126,21 @@ class LibPCLConan(ConanFile):
         cmake.build()
         cmake.install()
 
-    def package_info(self):
-        self.cpp_info.libs = tools.collect_libs(self)
+    def cmake_fix_path(self, file_path, package_name):
+        tools.replace_in_file(
+            file_path,
+            self.deps_cpp_info[package_name].rootpath.replace('\\', '/'),
+            "${CONAN_" + package_name.upper() + "_ROOT}"
+        )
+
+    def package(self):
+        tools.replace_in_file(os.path.join(self.package_folder, "share", "pcl-1.8", "PCLConfig.cmake"),
+                              self.build_folder.replace('\\', '/'), "${CONAN_PCL_ROOT}")
+
+        self.cmake_fix_path(os.path.join(self.package_folder, "share", "pcl-1.8", "PCLConfig.cmake"), "boost")
+        self.cmake_fix_path(os.path.join(self.package_folder, "share", "pcl-1.8", "PCLConfig.cmake"), "eigen")
+        self.cmake_fix_path(os.path.join(self.package_folder, "share", "pcl-1.8", "PCLConfig.cmake"), "flann")
+        self.cmake_fix_path(os.path.join(self.package_folder, "share", "pcl-1.8", "PCLConfig.cmake"), "vtk")
+
+        def package_info(self):
+            self.cpp_info.libs = tools.collect_libs(self)
