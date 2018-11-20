@@ -134,13 +134,13 @@ class LibPCLConan(ConanFile):
         )
 
     def package(self):
-        tools.replace_in_file(os.path.join(self.package_folder, "share", "pcl-1.8", "PCLConfig.cmake"),
-                              self.build_folder.replace('\\', '/'), "${CONAN_PCL_ROOT}")
+        if not tools.os_info.is_windows:
+            tools.replace_in_file(os.path.join(self.package_folder, "share", "pcl-1.8", "PCLConfig.cmake"), self.build_folder.replace('\\', '/'), "${CONAN_PCL_ROOT}")
 
-        self.cmake_fix_path(os.path.join(self.package_folder, "share", "pcl-1.8", "PCLConfig.cmake"), "boost")
-        self.cmake_fix_path(os.path.join(self.package_folder, "share", "pcl-1.8", "PCLConfig.cmake"), "eigen")
-        self.cmake_fix_path(os.path.join(self.package_folder, "share", "pcl-1.8", "PCLConfig.cmake"), "flann")
-        self.cmake_fix_path(os.path.join(self.package_folder, "share", "pcl-1.8", "PCLConfig.cmake"), "vtk")
+            self.cmake_fix_path(os.path.join(self.package_folder, "share", "pcl-1.8", "PCLConfig.cmake"), "boost")
+            self.cmake_fix_path(os.path.join(self.package_folder, "share", "pcl-1.8", "PCLConfig.cmake"), "eigen")
+            self.cmake_fix_path(os.path.join(self.package_folder, "share", "pcl-1.8", "PCLConfig.cmake"), "flann")
+            self.cmake_fix_path(os.path.join(self.package_folder, "share", "pcl-1.8", "PCLConfig.cmake"), "vtk")
 
         def package_info(self):
             self.cpp_info.libs = tools.collect_libs(self)
