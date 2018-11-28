@@ -26,7 +26,7 @@ class LibPCLConan(ConanFile):
         "patches/pcl_eigen.diff",
         "patches/pcl_gpu_error.diff"
     ]
-    url = "https://gitlab.lan.local/conan/conan-pcl"
+    url = "https://git.ircad.fr/conan/conan-pcl"
     license = "BSD License"
     description = "The Point Cloud Library is a standalone, large scale, open project for 2D/3D image and point cloud processing."
     source_subfolder = "source_subfolder"

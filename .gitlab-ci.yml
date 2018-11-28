@@ -5,6 +5,9 @@ variables:
 stages:
   - build
 
+before_script:
+  - git -c http.sslVerify=false clone --depth 1 https://gitlab-ci-token:${CI_JOB_TOKEN}@git.ircad.fr/conan/conan.git
+
 msvc2017:
   stage: build
   variables:
@@ -12,7 +15,6 @@ msvc2017:
     CONAN_USER_HOME: $CI_PROJECT_DIR
     CONAN_USE_CUDA: "False"
   script:
-    - git -c http.sslVerify=false clone --depth 1 https://gitlab-ci-token:${CI_JOB_TOKEN}@gitlab.lan.local/conan/conan.git
     - python conan/gitlab-ci/build.py
   tags:
     - shell
@@ -25,14 +27,13 @@ msvc2017-cuda:
     CONAN_USER_HOME: $CI_PROJECT_DIR
     CONAN_USE_CUDA: "True"
   script:
-    - git -c http.sslVerify=false clone --depth 1 https://gitlab-ci-token:${CI_JOB_TOKEN}@gitlab.lan.local/conan/conan.git
     - python conan/gitlab-ci/build.py
   tags:
     - shell
     - windows
 
 gcc-7:
-  image: registry.lan.local:5000/docker-envdev-gcc7:dev
+  image: ${DOCKER_ENVDEV_GCC7}
   stage: build
   variables:
     CONAN_GCC_VERSIONS: "7"
@@ -40,11 +41,10 @@ gcc-7:
   script:
     - export CC=/usr/bin/gcc-7
     - export CXX=/usr/bin/g++-7
-    - git -c http.sslVerify=false clone --depth 1 https://gitlab-ci-token:${CI_JOB_TOKEN}@gitlab.lan.local/conan/conan.git
     - python3 conan/gitlab-ci/build.py
 
 gcc-7-cuda:
-  image: registry.lan.local:5000/docker-envdev-gcc7:dev
+  image: ${DOCKER_ENVDEV_GCC7}
   stage: build
   variables:
     CONAN_GCC_VERSIONS: "7"
@@ -52,11 +52,10 @@ gcc-7-cuda:
   script:
     - export CC=/usr/bin/gcc-7
     - export CXX=/usr/bin/g++-7
-    - git -c http.sslVerify=false clone --depth 1 https://gitlab-ci-token:${CI_JOB_TOKEN}@gitlab.lan.local/conan/conan.git
     - python3 conan/gitlab-ci/build.py
 
 clang-6:
-  image: registry.lan.local:5000/docker-envdev-clang6:dev
+  image: ${DOCKER_ENVDEV_CLANG6}
   stage: build
   variables:
     CONAN_CLANG_VERSIONS: "6.0"
@@ -64,11 +63,10 @@ clang-6:
   script:
     - export CC=/usr/bin/clang-6.0
     - export CXX=/usr/bin/clang++-6.0
-    - git -c http.sslVerify=false clone --depth 1 https://gitlab-ci-token:${CI_JOB_TOKEN}@gitlab.lan.local/conan/conan.git
     - python3 conan/gitlab-ci/build.py
 
 clang-6-cuda:
-  image: registry.lan.local:5000/docker-envdev-clang6:dev
+  image: ${DOCKER_ENVDEV_CLANG6}
   stage: build
   variables:
     CONAN_CLANG_VERSIONS: "6.0"
@@ -76,7 +74,6 @@ clang-6-cuda:
   script:
     - export CC=/usr/bin/clang-6.0
     - export CXX=/usr/bin/clang++-6.0
-    - git -c http.sslVerify=false clone --depth 1 https://gitlab-ci-token:${CI_JOB_TOKEN}@gitlab.lan.local/conan/conan.git
     - python3 conan/gitlab-ci/build.py
     
 macos:
@@ -85,7 +82,6 @@ macos:
     CONAN_APPLE_CLANG_VERSIONS: "9.1"
     CONAN_USER_HOME: $CI_PROJECT_DIR
   script:
-    - git -c http.sslVerify=false clone --depth 1 https://gitlab-ci-token:${CI_JOB_TOKEN}@gitlab.lan.local/conan/conan.git
     - python3 conan/gitlab-ci/build.py
   tags:
     - macos
