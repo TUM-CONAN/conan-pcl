@@ -85,3 +85,13 @@ macos:
     - python3 conan/gitlab-ci/build.py
   tags:
     - macos
+
+macos-mojave:
+  stage: build
+  variables:
+    CONAN_APPLE_CLANG_VERSIONS: "10.0"
+    CONAN_USER_HOME: $CI_PROJECT_DIR
+  script:
+    - python3 conan/gitlab-ci/build.py
+  tags:
+    - mojave
