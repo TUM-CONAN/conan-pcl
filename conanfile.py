@@ -134,9 +134,12 @@ class LibPCLConan(ConanFile):
         )
 
     def package(self):
-        pcl_config_file = os.path.join(self.package_folder, "share", "pcl-1.8", "PCLConfig.cmake")
-        if not tools.os_info.is_windows:
-            tools.replace_in_file(pcl_config_file, self.build_folder.replace('\\', '/'), "${CONAN_PCL_ROOT}")             
+        if tools.os_info.is_windows:
+            pcl_config_file = os.path.join(self.package_folder, "cmake", "PCLConfig.cmake")
+        else:
+            pcl_config_file = os.path.join(self.package_folder, "share", "pcl-1.8", "PCLConfig.cmake")
+
+        tools.replace_in_file(pcl_config_file, self.build_folder.replace('\\', '/'), "${CONAN_PCL_ROOT}")             
         self.cmake_fix_path(pcl_config_file, "boost")
         self.cmake_fix_path(pcl_config_file, "eigen")
         self.cmake_fix_path(pcl_config_file, "flann")
