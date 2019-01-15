@@ -75,16 +75,25 @@ clang-6-cuda:
     - export CC=/usr/bin/clang-6.0
     - export CXX=/usr/bin/clang++-6.0
     - python3 conan/gitlab-ci/build.py
-    
-macos:
+
+mint19:
+  image: ${DOCKER_ENVDEV_MINT19}
   stage: build
-  variables:
-    CONAN_APPLE_CLANG_VERSIONS: "9.1"
-    CONAN_USER_HOME: $CI_PROJECT_DIR
   script:
+    - export CONAN_USE_CUDA="True"
+    - export CC=/usr/bin/gcc-7
+    - export CXX=/usr/bin/g++-7
     - python3 conan/gitlab-ci/build.py
-  tags:
-    - macos
+    - export CC=/usr/bin/clang-6.0
+    - export CXX=/usr/bin/clang++-6.0
+    - python3 conan/gitlab-ci/build.py
+    - export CONAN_USE_CUDA="False"
+    - export CC=/usr/bin/gcc-7
+    - export CXX=/usr/bin/g++-7
+    - python3 conan/gitlab-ci/build.py
+    - export CC=/usr/bin/clang-6.0
+    - export CXX=/usr/bin/clang++-6.0
+    - python3 conan/gitlab-ci/build.py
 
 macos-mojave:
   stage: build
