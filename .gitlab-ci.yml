@@ -76,21 +76,46 @@ clang-6-cuda:
     - export CXX=/usr/bin/clang++-6.0
     - python3 conan/gitlab-ci/build.py
 
-mint19:
+mint19-gcc-7:
   image: ${DOCKER_ENVDEV_MINT19}
   stage: build
+  variables:
+    CONAN_GCC_VERSIONS: "7"
+    CONAN_USE_CUDA: "False"
   script:
-    - export CONAN_USE_CUDA="True"
     - export CC=/usr/bin/gcc-7
     - export CXX=/usr/bin/g++-7
     - python3 conan/gitlab-ci/build.py
+
+mint19-gcc-7-cuda:
+  image: ${DOCKER_ENVDEV_MINT19}
+  stage: build
+  variables:
+    CONAN_GCC_VERSIONS: "7"
+    CONAN_USE_CUDA: "True"
+  script:
+    - export CC=/usr/bin/gcc-7
+    - export CXX=/usr/bin/g++-7
+    - python3 conan/gitlab-ci/build.py
+
+mint19-clang-6:
+  image: ${DOCKER_ENVDEV_MINT19}
+  stage: build
+  variables:
+    CONAN_CLANG_VERSIONS: "6.0"
+    CONAN_USE_CUDA: "False"
+  script:
     - export CC=/usr/bin/clang-6.0
     - export CXX=/usr/bin/clang++-6.0
     - python3 conan/gitlab-ci/build.py
-    - export CONAN_USE_CUDA="False"
-    - export CC=/usr/bin/gcc-7
-    - export CXX=/usr/bin/g++-7
-    - python3 conan/gitlab-ci/build.py
+
+mint19-clang-6-cuda:
+  image: ${DOCKER_ENVDEV_MINT19}
+  stage: build
+  variables:
+    CONAN_CLANG_VERSIONS: "6.0"
+    CONAN_USE_CUDA: "True"
+  script:
     - export CC=/usr/bin/clang-6.0
     - export CXX=/usr/bin/clang++-6.0
     - python3 conan/gitlab-ci/build.py
