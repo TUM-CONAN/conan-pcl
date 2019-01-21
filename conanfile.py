@@ -144,6 +144,7 @@ class LibPCLConan(ConanFile):
         self.cmake_fix_path(pcl_config_file, "eigen")
         self.cmake_fix_path(pcl_config_file, "flann")
         self.cmake_fix_path(pcl_config_file, "vtk")
+        self.cmake_fix_path(pcl_config_file, "openni")
 
     def package_info(self):
         self.cpp_info.libs = tools.collect_libs(self)
