@@ -7,16 +7,17 @@ from conans.util import files
 
 class LibPCLConan(ConanFile):
     name = "pcl"
-    version = "1.8.1-r1"
+    short_version = "1.8.1"
+    version = "{0}-r2".format(short_version)
     generators = "cmake"
     settings = "os", "arch", "compiler", "build_type"
     options = {
         "shared": [True, False],
-        "use_cuda": [True, False]
+        "cuda": ["9.2", "10.0", "None"]
     }
     default_options = [
         "shared=True",
-        "use_cuda=False"
+        "cuda=None"
     ]
     default_options = tuple(default_options)
     exports = [
@@ -100,7 +101,7 @@ class LibPCLConan(ConanFile):
         cmake.definitions["BUILD_segmentation"] = "ON"
         cmake.definitions["BUILD_registration"] = "ON"
 
-        if self.options.use_cuda:
+        if self.options.cuda != "None":
             cmake.definitions["BUILD_CUDA"] = "ON"
             cmake.definitions["BUILD_GPU"] = "ON"
             cmake.definitions["BUILD_gpu_kinfu"] = "ON"
@@ -139,7 +140,7 @@ class LibPCLConan(ConanFile):
         else:
             pcl_config_file = os.path.join(self.package_folder, "share", "pcl-1.8", "PCLConfig.cmake")
 
-        tools.replace_in_file(pcl_config_file, self.build_folder.replace('\\', '/'), "${CONAN_PCL_ROOT}")             
+        tools.replace_in_file(pcl_config_file, self.build_folder.replace('\\', '/'), "${CONAN_PCL_ROOT}")
         self.cmake_fix_path(pcl_config_file, "boost")
         self.cmake_fix_path(pcl_config_file, "eigen")
         self.cmake_fix_path(pcl_config_file, "flann")

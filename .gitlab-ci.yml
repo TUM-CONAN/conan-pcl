@@ -13,7 +13,7 @@ msvc2017:
   variables:
     CONAN_VISUAL_VERSIONS: "15"
     CONAN_USER_HOME: $CI_PROJECT_DIR
-    CONAN_USE_CUDA: "False"
+    CONAN_CUDA: "None"
   script:
     - python conan/gitlab-ci/build.py
   tags:
@@ -25,7 +25,7 @@ msvc2017-cuda:
   variables:
     CONAN_VISUAL_VERSIONS: "15"
     CONAN_USER_HOME: $CI_PROJECT_DIR
-    CONAN_USE_CUDA: "True"
+    CONAN_CUDA: "10.0"
   script:
     - python conan/gitlab-ci/build.py
   tags:
@@ -37,7 +37,7 @@ gcc-7:
   stage: build
   variables:
     CONAN_GCC_VERSIONS: "7"
-    CONAN_USE_CUDA: "False"
+    CONAN_CUDA: "None"
   script:
     - export CC=/usr/bin/gcc-7
     - export CXX=/usr/bin/g++-7
@@ -48,7 +48,7 @@ gcc-7-cuda:
   stage: build
   variables:
     CONAN_GCC_VERSIONS: "7"
-    CONAN_USE_CUDA: "True"
+    CONAN_CUDA: "9.2"
   script:
     - export CC=/usr/bin/gcc-7
     - export CXX=/usr/bin/g++-7
@@ -59,7 +59,7 @@ clang-6:
   stage: build
   variables:
     CONAN_CLANG_VERSIONS: "6.0"
-    CONAN_USE_CUDA: "False"
+    CONAN_CUDA: "None"
   script:
     - export CC=/usr/bin/clang-6.0
     - export CXX=/usr/bin/clang++-6.0
@@ -70,7 +70,7 @@ clang-6-cuda:
   stage: build
   variables:
     CONAN_CLANG_VERSIONS: "6.0"
-    CONAN_USE_CUDA: "True"
+    CONAN_CUDA: "9.2"
   script:
     - export CC=/usr/bin/clang-6.0
     - export CXX=/usr/bin/clang++-6.0
@@ -81,7 +81,7 @@ mint19-gcc-7:
   stage: build
   variables:
     CONAN_GCC_VERSIONS: "7"
-    CONAN_USE_CUDA: "False"
+    CONAN_CUDA: "None"
   script:
     - export CC=/usr/bin/gcc-7
     - export CXX=/usr/bin/g++-7
@@ -92,7 +92,7 @@ mint19-gcc-7-cuda:
   stage: build
   variables:
     CONAN_GCC_VERSIONS: "7"
-    CONAN_USE_CUDA: "True"
+    CONAN_CUDA: "10.0"
   script:
     - export CC=/usr/bin/gcc-7
     - export CXX=/usr/bin/g++-7
@@ -103,7 +103,7 @@ mint19-clang-6:
   stage: build
   variables:
     CONAN_CLANG_VERSIONS: "6.0"
-    CONAN_USE_CUDA: "False"
+    CONAN_CUDA: "None"
   script:
     - export CC=/usr/bin/clang-6.0
     - export CXX=/usr/bin/clang++-6.0
@@ -114,7 +114,7 @@ mint19-clang-6-cuda:
   stage: build
   variables:
     CONAN_CLANG_VERSIONS: "6.0"
-    CONAN_USE_CUDA: "True"
+    CONAN_CUDA: "10.0"
   script:
     - export CC=/usr/bin/clang-6.0
     - export CXX=/usr/bin/clang++-6.0
