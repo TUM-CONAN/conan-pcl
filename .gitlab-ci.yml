@@ -32,28 +32,6 @@ msvc2017-cuda:
     - shell
     - windows
 
-gcc-7:
-  image: ${DOCKER_ENVDEV_GCC7}
-  stage: build
-  variables:
-    CONAN_GCC_VERSIONS: "7"
-    CONAN_CUDA: "None"
-  script:
-    - export CC=/usr/bin/gcc-7
-    - export CXX=/usr/bin/g++-7
-    - python3 conan/gitlab-ci/build.py
-
-gcc-7-cuda:
-  image: ${DOCKER_ENVDEV_GCC7}
-  stage: build
-  variables:
-    CONAN_GCC_VERSIONS: "7"
-    CONAN_CUDA: "9.2"
-  script:
-    - export CC=/usr/bin/gcc-7
-    - export CXX=/usr/bin/g++-7
-    - python3 conan/gitlab-ci/build.py
-
 clang-6:
   image: ${DOCKER_ENVDEV_CLANG6}
   stage: build
@@ -96,28 +74,6 @@ mint19-gcc-7-cuda:
   script:
     - export CC=/usr/bin/gcc-7
     - export CXX=/usr/bin/g++-7
-    - python3 conan/gitlab-ci/build.py
-
-mint19-clang-6:
-  image: ${DOCKER_ENVDEV_MINT19}
-  stage: build
-  variables:
-    CONAN_CLANG_VERSIONS: "6.0"
-    CONAN_CUDA: "None"
-  script:
-    - export CC=/usr/bin/clang-6.0
-    - export CXX=/usr/bin/clang++-6.0
-    - python3 conan/gitlab-ci/build.py
-
-mint19-clang-6-cuda:
-  image: ${DOCKER_ENVDEV_MINT19}
-  stage: build
-  variables:
-    CONAN_CLANG_VERSIONS: "6.0"
-    CONAN_CUDA: "10.0"
-  script:
-    - export CC=/usr/bin/clang-6.0
-    - export CXX=/usr/bin/clang++-6.0
     - python3 conan/gitlab-ci/build.py
 
 macos-mojave:

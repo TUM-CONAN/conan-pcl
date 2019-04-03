@@ -3,12 +3,15 @@ import shutil
 
 from conans import ConanFile, CMake, tools, AutoToolsBuildEnvironment
 from conans.util import files
+from fnmatch import fnmatch
 
 
 class LibPCLConan(ConanFile):
     name = "pcl"
-    short_version = "1.8.1"
-    version = "{0}-r2".format(short_version)
+    upstream_version = "1.9.1"
+    package_revision = ""
+    version = "{0}{1}".format(upstream_version, package_revision)
+
     generators = "cmake"
     settings = "os", "arch", "compiler", "build_type"
     options = {
@@ -40,15 +43,15 @@ class LibPCLConan(ConanFile):
             os.environ["CONAN_SYSREQUIRES_MODE"] = "verify"
 
     def requirements(self):
-        self.requires("qt/5.11.2@sight/stable")
-        self.requires("eigen/3.3.4@sight/stable")
-        self.requires("boost/1.67.0@sight/stable")
-        self.requires("vtk/8.0.1-r1@sight/stable")
-        self.requires("openni/2.2.0-rev-958951f@sight/stable")
-        self.requires("flann/1.9.1@sight/stable")
+        self.requires("qt/5.12.2@sight/testing")
+        self.requires("eigen/3.3.7@sight/testing")
+        self.requires("boost/1.69.0@sight/testing")
+        self.requires("vtk/8.2.0@sight/testing")
+        self.requires("openni/2.2.0-r2@sight/testing")
+        self.requires("flann/1.9.1-r1@sight/testing")
 
         if tools.os_info.is_windows:
-            self.requires("zlib/1.2.11@sight/stable")
+            self.requires("zlib/1.2.11-r1@sight/testing")
 
     def build_requirements(self):
         if tools.os_info.linux_distro == "linuxmint":
@@ -61,9 +64,8 @@ class LibPCLConan(ConanFile):
             installer.install("zlib1g")
 
     def source(self):
-        rev = "9dae1eaa6750932db23d157cd624ef61ccd5544f"
-        tools.get("https://github.com/PointCloudLibrary/pcl/archive/{0}.tar.gz".format(rev))
-        os.rename("pcl-" + rev, self.source_subfolder)
+        tools.get("https://github.com/PointCloudLibrary/pcl/archive/pcl-{0}.tar.gz".format(self.upstream_version))
+        os.rename("pcl-pcl-{0}".format(self.upstream_version), self.source_subfolder)
 
     def build(self):
         pcl_source_dir = os.path.join(self.source_folder, self.source_subfolder)
@@ -72,6 +74,9 @@ class LibPCLConan(ConanFile):
         tools.patch(pcl_source_dir, "patches/kinfu.diff")
         tools.patch(pcl_source_dir, "patches/pcl_eigen.diff")
         tools.patch(pcl_source_dir, "patches/pcl_gpu_error.diff")
+
+        # Use our own FindFLANN which take care of conan..
+        os.remove(os.path.join(pcl_source_dir, 'cmake', 'Modules', 'FindFLANN.cmake'))
 
         cmake = CMake(self)
         cmake.definitions["BUILD_apps"] = "OFF"
@@ -128,24 +133,34 @@ class LibPCLConan(ConanFile):
         cmake.install()
 
     def cmake_fix_path(self, file_path, package_name):
-        tools.replace_in_file(
-            file_path,
-            self.deps_cpp_info[package_name].rootpath.replace('\\', '/'),
-            "${CONAN_" + package_name.upper() + "_ROOT}"
-        )
+        try:
+            tools.replace_in_file(
+                file_path,
+                self.deps_cpp_info[package_name].rootpath.replace('\\', '/'),
+                "${CONAN_" + package_name.upper() + "_ROOT}",
+                strict=False
+            )
+        except:
+            self.output.info("Ignoring {0}...".format(package_name))
 
     def package(self):
-        if tools.os_info.is_windows:
-            pcl_config_file = os.path.join(self.package_folder, "cmake", "PCLConfig.cmake")
-        else:
-            pcl_config_file = os.path.join(self.package_folder, "share", "pcl-1.8", "PCLConfig.cmake")
-
-        tools.replace_in_file(pcl_config_file, self.build_folder.replace('\\', '/'), "${CONAN_PCL_ROOT}")
-        self.cmake_fix_path(pcl_config_file, "boost")
-        self.cmake_fix_path(pcl_config_file, "eigen")
-        self.cmake_fix_path(pcl_config_file, "flann")
-        self.cmake_fix_path(pcl_config_file, "vtk")
-        self.cmake_fix_path(pcl_config_file, "openni")
+        for path, subdirs, names in os.walk(self.package_folder):
+            for name in names:
+                if fnmatch(name, '*.cmake'):
+                    cmake_file = os.path.join(path, name)
+                    
+                    tools.replace_in_file(
+                        cmake_file, 
+                        self.package_folder.replace('\\', '/'), 
+                        '${CONAN_PCL_ROOT}', 
+                        strict=False
+                    )
+                    
+                    self.cmake_fix_path(cmake_file, "boost")
+                    self.cmake_fix_path(cmake_file, "eigen")
+                    self.cmake_fix_path(cmake_file, "flann")
+                    self.cmake_fix_path(cmake_file, "vtk")
+                    self.cmake_fix_path(cmake_file, "openni")
 
     def package_info(self):
         self.cpp_info.libs = tools.collect_libs(self)
