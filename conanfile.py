@@ -98,6 +98,7 @@ class LibPCLConan(ConanFile):
         cmake.definitions["WITH_DAVIDSDK"] = "OFF"
         cmake.definitions["WITH_ENSENSO"] = "OFF"
         cmake.definitions["WITH_OPENNI"] = "OFF"
+        cmake.definitions["WITH_OPENNI2"] = "OFF"
         cmake.definitions["WITH_RSSDK"] = "OFF"
         cmake.definitions["WITH_QHULL"] = "OFF"
         cmake.definitions["BUILD_TESTS"] = "OFF"
