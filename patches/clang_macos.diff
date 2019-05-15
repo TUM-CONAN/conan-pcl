@@ -1,7 +1,8 @@
-diff -uNr a/CMakeLists.txt b/CMakeLists.txt
---- a/CMakeLists.txt	2018-02-12 17:19:00.004000983 +0100
-+++ b/CMakeLists.txt	2018-02-12 17:19:22.132000492 +0100
-@@ -82,7 +82,7 @@
+diff --git a/CMakeLists.txt b/CMakeLists.txt
+index 0b4c1a3..6ed31e3 100644
+--- a/CMakeLists.txt
++++ b/CMakeLists.txt
+@@ -71,7 +71,7 @@ SET(CMAKE_BUILD_TYPE "${CMAKE_BUILD_TYPE}" CACHE STRING
  # Compiler identification
  # Define a variable CMAKE_COMPILER_IS_X where X is the compiler short name.
  # Note: CMake automatically defines one for GNUCXX, nothing to do in this case.
