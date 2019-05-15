@@ -32,7 +32,7 @@ msvc2017-cuda:
     - shell
     - windows
 
-clang-6:
+mint18-clang-6:
   image: ${DOCKER_ENVDEV_CLANG6}
   stage: build
   variables:
@@ -43,7 +43,7 @@ clang-6:
     - export CXX=/usr/bin/clang++-6.0
     - python3 conan/gitlab-ci/build.py
 
-clang-6-cuda:
+mint18-clang-6-cuda:
   image: ${DOCKER_ENVDEV_CLANG6}
   stage: build
   variables:

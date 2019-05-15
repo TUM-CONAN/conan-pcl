@@ -43,15 +43,15 @@ class LibPCLConan(ConanFile):
             os.environ["CONAN_SYSREQUIRES_MODE"] = "verify"
 
     def requirements(self):
-        self.requires("qt/5.12.2@sight/testing")
-        self.requires("eigen/3.3.7@sight/testing")
-        self.requires("boost/1.69.0@sight/testing")
-        self.requires("vtk/8.2.0@sight/testing")
-        self.requires("openni/2.2.0-r2@sight/testing")
-        self.requires("flann/1.9.1-r1@sight/testing")
+        self.requires("qt/5.12.2@sight/stable")
+        self.requires("eigen/3.3.7@sight/stable")
+        self.requires("boost/1.69.0@sight/stable")
+        self.requires("vtk/8.2.0@sight/stable")
+        self.requires("openni/2.2.0-r2@sight/stable")
+        self.requires("flann/1.9.1-r1@sight/stable")
 
         if tools.os_info.is_windows:
-            self.requires("zlib/1.2.11-r1@sight/testing")
+            self.requires("zlib/1.2.11-r1@sight/stable")
 
     def build_requirements(self):
         if tools.os_info.linux_distro == "linuxmint":
