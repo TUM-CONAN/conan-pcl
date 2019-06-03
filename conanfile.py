@@ -9,7 +9,7 @@ from fnmatch import fnmatch
 class LibPCLConan(ConanFile):
     name = "pcl"
     upstream_version = "1.9.1"
-    package_revision = ""
+    package_revision = "-r1"
     version = "{0}{1}".format(upstream_version, package_revision)
 
     generators = "cmake"
@@ -43,15 +43,16 @@ class LibPCLConan(ConanFile):
             os.environ["CONAN_SYSREQUIRES_MODE"] = "verify"
 
     def requirements(self):
-        self.requires("qt/5.12.2@sight/stable")
-        self.requires("eigen/3.3.7@sight/stable")
-        self.requires("boost/1.69.0@sight/stable")
-        self.requires("vtk/8.2.0@sight/stable")
-        self.requires("openni/2.2.0-r2@sight/stable")
-        self.requires("flann/1.9.1-r1@sight/stable")
+        self.requires("common/1.0.0@sight/stable")
+        self.requires("qt/5.12.2-r1@sight/testing")
+        self.requires("eigen/3.3.7-r1@sight/testing")
+        self.requires("boost/1.69.0-r1@sight/testing")
+        self.requires("vtk/8.2.0-r1@sight/testing")
+        self.requires("openni/2.2.0-r3@sight/testing")
+        self.requires("flann/1.9.1-r2@sight/testing")
 
         if tools.os_info.is_windows:
-            self.requires("zlib/1.2.11-r1@sight/stable")
+            self.requires("zlib/1.2.11-r2@sight/testing")
 
     def build_requirements(self):
         if tools.os_info.linux_distro == "linuxmint":
@@ -68,6 +69,8 @@ class LibPCLConan(ConanFile):
         os.rename("pcl-pcl-{0}".format(self.upstream_version), self.source_subfolder)
 
     def build(self):
+        #Import common flags and defines
+        import common
         pcl_source_dir = os.path.join(self.source_folder, self.source_subfolder)
         shutil.move("patches/CMakeProjectWrapper.txt", "CMakeLists.txt")
         tools.patch(pcl_source_dir, "patches/clang_macos.diff")
@@ -79,6 +82,11 @@ class LibPCLConan(ConanFile):
         os.remove(os.path.join(pcl_source_dir, 'cmake', 'Modules', 'FindFLANN.cmake'))
 
         cmake = CMake(self)
+        
+        #Set common flags
+        cmake.definitions["CMAKE_C_FLAGS"] = common.get_c_flags()
+        cmake.definitions["CMAKE_CXX_FLAGS"] = common.get_cxx_flags()
+        
         cmake.definitions["BUILD_apps"] = "OFF"
         cmake.definitions["BUILD_examples"] = "OFF"
         cmake.definitions["BUILD_common"] = "ON"
