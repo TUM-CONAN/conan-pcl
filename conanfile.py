@@ -69,8 +69,9 @@ class LibPCLConan(ConanFile):
         os.rename("pcl-pcl-{0}".format(self.upstream_version), self.source_subfolder)
 
     def build(self):
-        #Import common flags and defines
+        # Import common flags and defines
         import common
+
         pcl_source_dir = os.path.join(self.source_folder, self.source_subfolder)
         shutil.move("patches/CMakeProjectWrapper.txt", "CMakeLists.txt")
         tools.patch(pcl_source_dir, "patches/clang_macos.diff")
@@ -83,9 +84,9 @@ class LibPCLConan(ConanFile):
 
         cmake = CMake(self)
         
-        #Set common flags
-        cmake.definitions["CMAKE_C_FLAGS"] = common.get_c_flags()
-        cmake.definitions["CMAKE_CXX_FLAGS"] = common.get_cxx_flags()
+        # Set common flags
+        cmake.definitions["SIGHT_CMAKE_C_FLAGS"] = common.get_c_flags()
+        cmake.definitions["SIGHT_CMAKE_CXX_FLAGS"] = common.get_cxx_flags()
         
         cmake.definitions["BUILD_apps"] = "OFF"
         cmake.definitions["BUILD_examples"] = "OFF"
@@ -122,7 +123,7 @@ class LibPCLConan(ConanFile):
             cmake.definitions["BUILD_gpu_kinfu_large_scale"] = "ON"
             cmake.definitions["BUILD_visualization"] = "ON"
             cmake.definitions["BUILD_surface"] = "ON"
-            cmake.definitions["CUDA_ARCH_BIN"] = "3.0 3.5 5.0 5.2 6.1"
+            cmake.definitions["CUDA_ARCH_BIN"] = ' '.join(common.get_cuda_arch())
 
         if tools.os_info.is_macos:
             cmake.definitions["BUILD_gpu_features"] = "OFF"
