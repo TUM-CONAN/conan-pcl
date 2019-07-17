@@ -27,6 +27,7 @@ class LibPCLConan(ConanFile):
         "patches/CMakeProjectWrapper.txt",
         "patches/clang_macos.diff",
         "patches/kinfu.diff",
+        "patches/pcl_cuda_thrust.diff",
         "patches/pcl_eigen.diff",
         "patches/pcl_gpu_error.diff"
     ]
@@ -82,6 +83,7 @@ class LibPCLConan(ConanFile):
         tools.patch(pcl_source_dir, "patches/kinfu.diff")
         tools.patch(pcl_source_dir, "patches/pcl_eigen.diff")
         tools.patch(pcl_source_dir, "patches/pcl_gpu_error.diff")
+        tools.patch(pcl_source_dir, "patches/pcl_cuda_thrust.diff")
 
         # Use our own FindFLANN which take care of conan..
         os.remove(os.path.join(pcl_source_dir, 'cmake', 'Modules', 'FindFLANN.cmake'))

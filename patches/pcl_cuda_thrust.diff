@@ -1,0 +1,12 @@
+diff --git a/cuda/common/include/pcl/cuda/thrust.h b/cuda/common/include/pcl/cuda/thrust.h
+index bba05d9611..ad3efbb5f9 100644
+--- a/cuda/common/include/pcl/cuda/thrust.h
++++ b/cuda/common/include/pcl/cuda/thrust.h
+@@ -42,6 +42,7 @@
+ 
+ #include <thrust/host_vector.h>
+ #include <thrust/device_vector.h>
++#include <thrust/device_malloc.h>
+ #include <thrust/copy.h>
+ #include <thrust/device_ptr.h>
+ #include <thrust/sequence.h>
