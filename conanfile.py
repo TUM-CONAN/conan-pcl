@@ -39,8 +39,8 @@ class LibPCLConan(ConanFile):
 
     def configure(self):
         # del self.settings.compiler.libcxx
-        if 'CI' not in os.environ:
-            os.environ["CONAN_SYSREQUIRES_MODE"] = "verify"
+        # if 'CI' not in os.environ:
+        #     os.environ["CONAN_SYSREQUIRES_MODE"] = "verify"
         self.options["Boost"].fPIC = True
         # self.options["Boost"].shared=True
 
