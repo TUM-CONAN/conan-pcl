@@ -16,7 +16,7 @@ class LibPCLConan(ConanFile):
     settings = "os", "arch", "compiler", "build_type"
     options = {
         "shared": [True, False],
-        "cuda": ["9.2", "10.0", "None"]
+        "cuda": ["9.2", "10.0", "10.1", "None"]
     }
     default_options = [
         "shared=True",
