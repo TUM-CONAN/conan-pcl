@@ -9,7 +9,7 @@ from fnmatch import fnmatch
 class LibPCLConan(ConanFile):
     name = "pcl"
     upstream_version = "1.9.1"
-    package_revision = "-r1"
+    package_revision = "-r2"
     version = "{0}{1}".format(upstream_version, package_revision)
 
     generators = "cmake"
@@ -44,10 +44,10 @@ class LibPCLConan(ConanFile):
 
     def requirements(self):
         self.requires("common/1.0.0@sight/stable")
-        self.requires("qt/5.12.2-r1@sight/stable")
+        self.requires("qt/5.12.4@sight/testing")
         self.requires("eigen/3.3.7-r1@sight/stable")
-        self.requires("boost/1.69.0-r1@sight/stable")
-        self.requires("vtk/8.2.0-r1@sight/stable")
+        self.requires("boost/1.69.0-r2@sight/testing")
+        self.requires("vtk/8.2.0-r2@sight/testing")
         self.requires("openni/2.2.0-r3@sight/stable")
         self.requires("flann/1.9.1-r2@sight/stable")
 
