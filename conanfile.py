@@ -16,10 +16,12 @@ class LibPCLConan(ConanFile):
     settings = "os", "arch", "compiler", "build_type"
     options = {
         "shared": [True, False],
-        "cuda": ["9.2", "10.0", "None"]
+        "fPIC": [True, False],
+        "cuda": ["9.2", "10.0", "10.1", "None"]
     }
     default_options = [
         "shared=True",
+        "fPIC=True",
         "cuda=None"
     ]
     default_options = tuple(default_options)
@@ -28,7 +30,8 @@ class LibPCLConan(ConanFile):
         "patches/clang_macos.diff",
         "patches/kinfu.diff",
         "patches/pcl_eigen.diff",
-        "patches/pcl_gpu_error.diff"
+        "patches/pcl_gpu_error.diff",
+        "patches/point_cloud.diff"
     ]
     url = "https://git.ircad.fr/conan/conan-pcl"
     license = "BSD License"
@@ -36,6 +39,10 @@ class LibPCLConan(ConanFile):
     source_subfolder = "source_subfolder"
     build_subfolder = "build_subfolder"
     short_paths = True
+
+    def config_options(self):
+        if tools.os_info.is_windows:
+            del self.options.fPIC
 
     def configure(self):
         del self.settings.compiler.libcxx
@@ -78,6 +85,7 @@ class LibPCLConan(ConanFile):
         tools.patch(pcl_source_dir, "patches/kinfu.diff")
         tools.patch(pcl_source_dir, "patches/pcl_eigen.diff")
         tools.patch(pcl_source_dir, "patches/pcl_gpu_error.diff")
+        tools.patch(pcl_source_dir, "patches/point_cloud.diff")
 
         # Use our own FindFLANN which take care of conan..
         os.remove(os.path.join(pcl_source_dir, 'cmake', 'Modules', 'FindFLANN.cmake'))
@@ -134,9 +142,6 @@ class LibPCLConan(ConanFile):
             # Clang >= 3.8 is not supported by CUDA 7.5
             cmake.definitions["CUDA_HOST_COMPILER"] = "/usr/bin/gcc"
             cmake.definitions["CUDA_PROPAGATE_HOST_FLAGS"] = "OFF"
-
-        if not tools.os_info.is_windows:
-            cmake.definitions["CMAKE_POSITION_INDEPENDENT_CODE"] = "ON"
 
         cmake.configure(build_folder=self.build_subfolder)
         cmake.build()
