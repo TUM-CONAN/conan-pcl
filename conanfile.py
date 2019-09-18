@@ -44,6 +44,9 @@ class LibPCLConan(ConanFile):
             del self.options.fPIC
 
     def configure(self):
+        # PCL is not well prepared for c++ standard > 11...
+        del self.settings.compiler.cppstd
+
         if 'CI' not in os.environ:
             os.environ["CONAN_SYSREQUIRES_MODE"] = "verify"
 
