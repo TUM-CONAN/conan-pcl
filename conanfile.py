@@ -1,8 +1,7 @@
 import os
 import shutil
 
-from conans import ConanFile, CMake, tools, AutoToolsBuildEnvironment
-from conans.util import files
+from conans import ConanFile, CMake, tools
 from fnmatch import fnmatch
 
 
