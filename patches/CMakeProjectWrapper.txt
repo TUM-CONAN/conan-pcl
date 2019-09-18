@@ -4,7 +4,20 @@ project(cmake_wrapper)
 include(conanbuildinfo.cmake)
 conan_basic_setup()
 
-set(CMAKE_C_FLAGS "${CMAKE_C_FLAGS} ${SIGHT_CMAKE_C_FLAGS}")
-set(CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} ${SIGHT_CMAKE_CXX_FLAGS}")
+separate_arguments(SIGHT_CMAKE_CXX_FLAGS)
+separate_arguments(SIGHT_CMAKE_CXX_FLAGS_RELEASE)
+separate_arguments(SIGHT_CMAKE_CXX_FLAGS_DEBUG)
+separate_arguments(SIGHT_CMAKE_CXX_FLAGS_RELWITHDEBINFO)
+
+add_compile_options(
+    ${SIGHT_CXX_FLAGS}
+    "$<$<CONFIG:RELEASE>:${SIGHT_CXX_FLAGS_RELEASE}>"
+    "$<$<CONFIG:DEBUG>:${SIGHT_CXX_FLAGS_DEBUG}>"
+    "$<$<CONFIG:RELWITHDEBINFO>:${SIGHT_CXX_FLAGS_RELWITHDEBINFO}>"
+)
+
+if(MSVC)
+    set(CMAKE_CXX_FLAGS_DEBUG_INIT ${SIGHT_CXX_FLAGS_DEBUG})
+endif()
 
 add_subdirectory("source_subfolder")

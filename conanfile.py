@@ -35,7 +35,7 @@ class LibPCLConan(ConanFile):
     ]
     url = "https://git.ircad.fr/conan/conan-pcl"
     license = "BSD License"
-    description = "The Point Cloud Library is a standalone, large scale, open project for 2D/3D image and point cloud processing."
+    description = "The Point Cloud Library is for 2D/3D image and point cloud processing."
     source_subfolder = "source_subfolder"
     build_subfolder = "build_subfolder"
     short_paths = True
@@ -45,7 +45,6 @@ class LibPCLConan(ConanFile):
             del self.options.fPIC
 
     def configure(self):
-        del self.settings.compiler.libcxx
         if 'CI' not in os.environ:
             os.environ["CONAN_SYSREQUIRES_MODE"] = "verify"
 
@@ -91,11 +90,13 @@ class LibPCLConan(ConanFile):
         os.remove(os.path.join(pcl_source_dir, 'cmake', 'Modules', 'FindFLANN.cmake'))
 
         cmake = CMake(self)
-        
-        # Set common flags
-        cmake.definitions["SIGHT_CMAKE_C_FLAGS"] = common.get_c_flags()
+
+        # Export common flags
         cmake.definitions["SIGHT_CMAKE_CXX_FLAGS"] = common.get_cxx_flags()
-        
+        cmake.definitions["SIGHT_CMAKE_CXX_FLAGS_RELEASE"] = common.get_cxx_flags_release()
+        cmake.definitions["SIGHT_CMAKE_CXX_FLAGS_DEBUG"] = common.get_cxx_flags_debug()
+        cmake.definitions["SIGHT_CMAKE_CXX_FLAGS_RELWITHDEBINFO"] = common.get_cxx_flags_relwithdebinfo()
+
         cmake.definitions["BUILD_apps"] = "OFF"
         cmake.definitions["BUILD_examples"] = "OFF"
         cmake.definitions["BUILD_common"] = "ON"
@@ -155,7 +156,7 @@ class LibPCLConan(ConanFile):
                 "${CONAN_" + package_name.upper() + "_ROOT}",
                 strict=False
             )
-        except:
+        except BaseException:
             self.output.info("Ignoring {0}...".format(package_name))
 
     def package(self):
@@ -163,14 +164,14 @@ class LibPCLConan(ConanFile):
             for name in names:
                 if fnmatch(name, '*.cmake'):
                     cmake_file = os.path.join(path, name)
-                    
+
                     tools.replace_in_file(
-                        cmake_file, 
-                        self.package_folder.replace('\\', '/'), 
-                        '${CONAN_PCL_ROOT}', 
+                        cmake_file,
+                        self.package_folder.replace('\\', '/'),
+                        '${CONAN_PCL_ROOT}',
                         strict=False
                     )
-                    
+
                     self.cmake_fix_path(cmake_file, "boost")
                     self.cmake_fix_path(cmake_file, "eigen")
                     self.cmake_fix_path(cmake_file, "flann")
