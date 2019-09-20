@@ -1,7 +1,6 @@
 import os
 
 from conans import ConanFile, CMake, tools
-from fnmatch import fnmatch
 
 
 class LibPCLConan(ConanFile):
