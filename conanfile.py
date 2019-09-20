@@ -46,7 +46,7 @@ class LibPCLConan(ConanFile):
         # self.options["Boost"].shared=True
 
     def requirements(self):
-        self.requires("qt/5.12.2-r1@ircad/testing")
+        self.requires("qt/5.12.2-r1@camposs/stable")
         self.requires("eigen/3.3.7@camposs/stable")
         self.requires("Boost/1.65.1@camposs/stable")
         self.requires("vtk/8.2.0-r1@camposs/stable")
