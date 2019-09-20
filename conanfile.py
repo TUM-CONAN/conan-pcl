@@ -1,5 +1,4 @@
 import os
-import shutil
 
 from conans import ConanFile, CMake, tools
 from fnmatch import fnmatch
@@ -25,7 +24,6 @@ class LibPCLConan(ConanFile):
     ]
     default_options = tuple(default_options)
     exports = [
-        "patches/CMakeProjectWrapper.txt",
         "patches/clang_macos.diff",
         "patches/kinfu.diff",
         "patches/pcl_eigen.diff",
@@ -36,7 +34,6 @@ class LibPCLConan(ConanFile):
     license = "BSD License"
     description = "The Point Cloud Library is for 2D/3D image and point cloud processing."
     source_subfolder = "source_subfolder"
-    build_subfolder = "build_subfolder"
     short_paths = True
 
     def config_options(self):
@@ -77,11 +74,7 @@ class LibPCLConan(ConanFile):
         os.rename("pcl-pcl-{0}".format(self.upstream_version), self.source_subfolder)
 
     def build(self):
-        # Import common flags and defines
-        import common
-
         pcl_source_dir = os.path.join(self.source_folder, self.source_subfolder)
-        shutil.move("patches/CMakeProjectWrapper.txt", "CMakeLists.txt")
         tools.patch(pcl_source_dir, "patches/clang_macos.diff")
         tools.patch(pcl_source_dir, "patches/kinfu.diff")
         tools.patch(pcl_source_dir, "patches/pcl_eigen.diff")
@@ -91,13 +84,18 @@ class LibPCLConan(ConanFile):
         # Use our own FindFLANN which take care of conan..
         os.remove(os.path.join(pcl_source_dir, 'cmake', 'Modules', 'FindFLANN.cmake'))
 
-        cmake = CMake(self)
+        # Import common flags and defines
+        import common
 
-        # Export common flags
-        cmake.definitions["SIGHT_CMAKE_CXX_FLAGS"] = common.get_cxx_flags()
-        cmake.definitions["SIGHT_CMAKE_CXX_FLAGS_RELEASE"] = common.get_cxx_flags_release()
-        cmake.definitions["SIGHT_CMAKE_CXX_FLAGS_DEBUG"] = common.get_cxx_flags_debug()
-        cmake.definitions["SIGHT_CMAKE_CXX_FLAGS_RELWITHDEBINFO"] = common.get_cxx_flags_relwithdebinfo()
+        # Generate Cmake wrapper
+        common.generate_cmake_wrapper(
+            cmakelists_path='CMakeLists.txt',
+            source_subfolder=self.source_subfolder,
+            build_type=self.settings.build_type
+        )
+
+        cmake = CMake(self)
+        cmake.verbose = True
 
         cmake.definitions["BUILD_apps"] = "OFF"
         cmake.definitions["BUILD_examples"] = "OFF"
@@ -146,39 +144,15 @@ class LibPCLConan(ConanFile):
             cmake.definitions["CUDA_HOST_COMPILER"] = "/usr/bin/gcc"
             cmake.definitions["CUDA_PROPAGATE_HOST_FLAGS"] = "OFF"
 
-        cmake.configure(build_folder=self.build_subfolder)
+        cmake.configure()
         cmake.build()
         cmake.install()
 
-    def cmake_fix_path(self, file_path, package_name):
-        try:
-            tools.replace_in_file(
-                file_path,
-                self.deps_cpp_info[package_name].rootpath.replace('\\', '/'),
-                "${CONAN_" + package_name.upper() + "_ROOT}",
-                strict=False
-            )
-        except BaseException:
-            self.output.info("Ignoring {0}...".format(package_name))
-
     def package(self):
-        for path, subdirs, names in os.walk(self.package_folder):
-            for name in names:
-                if fnmatch(name, '*.cmake'):
-                    cmake_file = os.path.join(path, name)
+        # Import common flags and defines
+        import common
 
-                    tools.replace_in_file(
-                        cmake_file,
-                        self.package_folder.replace('\\', '/'),
-                        '${CONAN_PCL_ROOT}',
-                        strict=False
-                    )
-
-                    self.cmake_fix_path(cmake_file, "boost")
-                    self.cmake_fix_path(cmake_file, "eigen")
-                    self.cmake_fix_path(cmake_file, "flann")
-                    self.cmake_fix_path(cmake_file, "vtk")
-                    self.cmake_fix_path(cmake_file, "openni")
+        common.fix_conan_path(self, self.package_folder, '*.cmake')
 
     def package_info(self):
         self.cpp_info.libs = tools.collect_libs(self)
