@@ -1,15 +1,12 @@
 import os
-import shutil
 
-from conans import ConanFile, CMake, tools, AutoToolsBuildEnvironment
-from conans.util import files
-from fnmatch import fnmatch
+from conans import ConanFile, CMake, tools
 
 
 class LibPCLConan(ConanFile):
     name = "pcl"
     upstream_version = "1.9.1"
-    package_revision = "-r3"
+    package_revision = "-r4"
     version = "{0}{1}".format(upstream_version, package_revision)
 
     generators = "cmake"
@@ -26,7 +23,6 @@ class LibPCLConan(ConanFile):
     ]
     default_options = tuple(default_options)
     exports = [
-        "patches/CMakeProjectWrapper.txt",
         "patches/clang_macos.diff",
         "patches/kinfu.diff",
         "patches/pcl_eigen.diff",
@@ -35,9 +31,8 @@ class LibPCLConan(ConanFile):
     ]
     url = "https://git.ircad.fr/conan/conan-pcl"
     license = "BSD License"
-    description = "The Point Cloud Library is a standalone, large scale, open project for 2D/3D image and point cloud processing."
+    description = "The Point Cloud Library is for 2D/3D image and point cloud processing."
     source_subfolder = "source_subfolder"
-    build_subfolder = "build_subfolder"
     short_paths = True
 
     def config_options(self):
@@ -45,21 +40,23 @@ class LibPCLConan(ConanFile):
             del self.options.fPIC
 
     def configure(self):
-        del self.settings.compiler.libcxx
+        # PCL is not well prepared for c++ standard > 11...
+        del self.settings.compiler.cppstd
+
         if 'CI' not in os.environ:
             os.environ["CONAN_SYSREQUIRES_MODE"] = "verify"
 
     def requirements(self):
-        self.requires("common/1.0.0@sight/stable")
-        self.requires("qt/5.12.4@sight/stable")
-        self.requires("eigen/3.3.7-r1@sight/stable")
-        self.requires("boost/1.69.0-r2@sight/stable")
-        self.requires("vtk/8.2.0-r2@sight/stable")
-        self.requires("openni/2.2.0-r3@sight/stable")
-        self.requires("flann/1.9.1-r3@sight/stable")
+        self.requires("common/1.0.1@sight/stable")
+        self.requires("qt/5.12.4-r1@sight/stable")
+        self.requires("eigen/3.3.7-r2@sight/stable")
+        self.requires("boost/1.69.0-r3@sight/stable")
+        self.requires("vtk/8.2.0-r3@sight/stable")
+        self.requires("openni/2.2.0-r4@sight/stable")
+        self.requires("flann/1.9.1-r4@sight/stable")
 
         if tools.os_info.is_windows:
-            self.requires("zlib/1.2.11-r2@sight/stable")
+            self.requires("zlib/1.2.11-r3@sight/stable")
 
     def build_requirements(self):
         if tools.os_info.linux_distro == "linuxmint":
@@ -76,11 +73,7 @@ class LibPCLConan(ConanFile):
         os.rename("pcl-pcl-{0}".format(self.upstream_version), self.source_subfolder)
 
     def build(self):
-        # Import common flags and defines
-        import common
-
         pcl_source_dir = os.path.join(self.source_folder, self.source_subfolder)
-        shutil.move("patches/CMakeProjectWrapper.txt", "CMakeLists.txt")
         tools.patch(pcl_source_dir, "patches/clang_macos.diff")
         tools.patch(pcl_source_dir, "patches/kinfu.diff")
         tools.patch(pcl_source_dir, "patches/pcl_eigen.diff")
@@ -90,12 +83,18 @@ class LibPCLConan(ConanFile):
         # Use our own FindFLANN which take care of conan..
         os.remove(os.path.join(pcl_source_dir, 'cmake', 'Modules', 'FindFLANN.cmake'))
 
+        # Import common flags and defines
+        import common
+
+        # Generate Cmake wrapper
+        common.generate_cmake_wrapper(
+            cmakelists_path='CMakeLists.txt',
+            source_subfolder=self.source_subfolder,
+            build_type=self.settings.build_type
+        )
+
         cmake = CMake(self)
-        
-        # Set common flags
-        cmake.definitions["SIGHT_CMAKE_C_FLAGS"] = common.get_c_flags()
-        cmake.definitions["SIGHT_CMAKE_CXX_FLAGS"] = common.get_cxx_flags()
-        
+
         cmake.definitions["BUILD_apps"] = "OFF"
         cmake.definitions["BUILD_examples"] = "OFF"
         cmake.definitions["BUILD_common"] = "ON"
@@ -143,39 +142,15 @@ class LibPCLConan(ConanFile):
             cmake.definitions["CUDA_HOST_COMPILER"] = "/usr/bin/gcc"
             cmake.definitions["CUDA_PROPAGATE_HOST_FLAGS"] = "OFF"
 
-        cmake.configure(build_folder=self.build_subfolder)
+        cmake.configure()
         cmake.build()
         cmake.install()
 
-    def cmake_fix_path(self, file_path, package_name):
-        try:
-            tools.replace_in_file(
-                file_path,
-                self.deps_cpp_info[package_name].rootpath.replace('\\', '/'),
-                "${CONAN_" + package_name.upper() + "_ROOT}",
-                strict=False
-            )
-        except:
-            self.output.info("Ignoring {0}...".format(package_name))
-
     def package(self):
-        for path, subdirs, names in os.walk(self.package_folder):
-            for name in names:
-                if fnmatch(name, '*.cmake'):
-                    cmake_file = os.path.join(path, name)
-                    
-                    tools.replace_in_file(
-                        cmake_file, 
-                        self.package_folder.replace('\\', '/'), 
-                        '${CONAN_PCL_ROOT}', 
-                        strict=False
-                    )
-                    
-                    self.cmake_fix_path(cmake_file, "boost")
-                    self.cmake_fix_path(cmake_file, "eigen")
-                    self.cmake_fix_path(cmake_file, "flann")
-                    self.cmake_fix_path(cmake_file, "vtk")
-                    self.cmake_fix_path(cmake_file, "openni")
+        # Import common flags and defines
+        import common
+
+        common.fix_conan_path(self, self.package_folder, '*.cmake')
 
     def package_info(self):
         self.cpp_info.libs = tools.collect_libs(self)
