@@ -117,7 +117,8 @@ class LibPCLConan(ConanFile):
         common.generate_cmake_wrapper(
             cmakelists_path='CMakeLists.txt',
             source_subfolder=self.source_subfolder,
-            build_type=self.settings.build_type
+            build_type=self.settings.build_type,
+            setup_cuda=True
         )
 
         cmake = CMake(self)
@@ -166,8 +167,6 @@ class LibPCLConan(ConanFile):
         if tools.os_info.is_windows:
             cmake.definitions["CUDA_PROPAGATE_HOST_FLAGS"] = "ON"
         else:
-            # Clang >= 3.8 is not supported by CUDA 7.5
-            cmake.definitions["CUDA_HOST_COMPILER"] = "/usr/bin/gcc"
             cmake.definitions["CUDA_PROPAGATE_HOST_FLAGS"] = "OFF"
 
         cmake.configure()
