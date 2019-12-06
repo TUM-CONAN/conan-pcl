@@ -16,7 +16,7 @@ class LibPCLConan(ConanFile):
     settings = "os", "arch", "compiler", "build_type"
     options = {
         "shared": [True, False],
-        "cuda": ["9.2", "10.0", "10.1", "None"]
+        "cuda": ["9.2", "10.0", "10.1", "10.2", "None"]
     }
     default_options = [
         "shared=True",
@@ -125,7 +125,7 @@ class LibPCLConan(ConanFile):
             cmake.definitions["BUILD_gpu_kinfu_large_scale"] = "ON"
             cmake.definitions["BUILD_visualization"] = "ON"
             cmake.definitions["BUILD_surface"] = "ON"
-            cmake.definitions["CUDA_ARCH_BIN"] = "3.0 3.5 5.0 5.2 6.1"
+            cmake.definitions["CUDA_ARCH_BIN"] = "5.0 5.2 6.1 7.0 7.2 7.5"
 
         if tools.os_info.is_macos:
             cmake.definitions["BUILD_gpu_features"] = "OFF"
