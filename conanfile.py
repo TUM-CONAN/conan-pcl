@@ -15,7 +15,7 @@ class LibPCLConan(ConanFile):
     options = {
         "shared": [True, False],
         "fPIC": [True, False],
-        "cuda": ["9.2", "10.0", "10.1", "None"]
+        "cuda": ["9.2", "10.0", "10.1", "10.2", "None"]
     }
     default_options = [
         "shared=True",
@@ -28,7 +28,9 @@ class LibPCLConan(ConanFile):
         "patches/kinfu.diff",
         "patches/pcl_eigen.diff",
         "patches/pcl_gpu_error.diff",
-        "patches/point_cloud.diff"
+        "patches/point_cloud.diff",
+        "patches/pcl_supervoxel_clustering.diff",
+        "patches/cmake_add_new_boost_versions.diff",
     ]
     url = "https://git.ircad.fr/conan/conan-pcl"
     license = "BSD License"
@@ -44,28 +46,40 @@ class LibPCLConan(ConanFile):
         # PCL is not well prepared for c++ standard > 11...
         del self.settings.compiler.cppstd
 
-        if 'CI' not in os.environ:
-            os.environ["CONAN_SYSREQUIRES_MODE"] = "verify"
+        # if 'CI' not in os.environ:
+        #     os.environ["CONAN_SYSREQUIRES_MODE"] = "verify"
 
-    def requirements(self):
-        self.requires("common/1.0.2@sight/stable")
-        self.requires("qt/5.12.4-r2@sight/stable")
-        self.requires("eigen/3.3.7-r3@sight/stable")
-        self.requires("boost/1.69.0-r4@sight/stable")
-        self.requires("vtk/8.2.0-r4@sight/stable")
-        self.requires("openni/2.2.0-r5@sight/stable")
-        self.requires("flann/1.9.1-r5@sight/stable")
+        if self.settings.os == "Linux":
+            self.options["Boost"].fPIC = True
 
         if tools.os_info.is_windows:
-            self.requires("zlib/1.2.11-r4@sight/stable")
+            self.options["Boost"].shared=True
+
+    def requirements(self):
+        self.requires("ircad_common/1.0.2@camposs/stable")
+        self.requires("qt/5.12.4-r2@camposs/stable")
+        self.requires("eigen/3.3.7@camposs/stable")
+        self.requires("Boost/1.70.0@camposs/stable")
+        self.requires("vtk/8.2.0-r4@camposs/stable")
+        self.requires("openni/2.2.0-r3@camposs/stable")
+        self.requires("flann/1.9.1-r2@camposs/stable")
+
+        if tools.os_info.is_windows:
+            self.requires("zlib/1.2.11@camposs/stable")
 
     def build_requirements(self):
         if tools.os_info.linux_distro == "linuxmint":
             installer = tools.SystemPackageTool()
             installer.install("zlib1g-dev")
+        if tools.os_info.linux_distro == "ubuntu":
+            installer = tools.SystemPackageTool()
+            installer.install("zlib1g-dev")
 
     def system_requirements(self):
         if tools.os_info.linux_distro == "linuxmint":
+            installer = tools.SystemPackageTool()
+            installer.install("zlib1g")
+        if tools.os_info.linux_distro == "ubuntu":
             installer = tools.SystemPackageTool()
             installer.install("zlib1g")
 
@@ -85,6 +99,8 @@ class LibPCLConan(ConanFile):
         tools.patch(pcl_source_dir, "patches/pcl_eigen.diff")
         tools.patch(pcl_source_dir, "patches/pcl_gpu_error.diff")
         tools.patch(pcl_source_dir, "patches/point_cloud.diff")
+        tools.patch(pcl_source_dir, "patches/pcl_supervoxel_clustering.diff")
+        tools.patch(pcl_source_dir, "patches/cmake_add_new_boost_versions.diff")
 
         # patch for cuda arch >7.0
 

@@ -1,0 +1,60 @@
+diff --git a/PCLConfig.cmake.in b/PCLConfig.cmake.in
+index 6fadb5954..b822bdeb2 100644
+--- a/PCLConfig.cmake.in
++++ b/PCLConfig.cmake.in
+@@ -98,20 +98,13 @@ macro(find_boost)
+     set(Boost_USE_STATIC_LIBS @Boost_USE_STATIC_LIBS@)
+     set(Boost_USE_STATIC @Boost_USE_STATIC@)
+     set(Boost_USE_MULTITHREAD @Boost_USE_MULTITHREAD@)
+-  endif(WIN32)
+-  if(${CMAKE_VERSION} VERSION_LESS 2.8.5)
+-    set(Boost_ADDITIONAL_VERSIONS
+-      "1.47.0" "1.47" "1.46.1"
+-      "1.46.0" "1.46" "1.45.0" "1.45" "1.44.0" "1.44" "1.43.0" "1.43")
+-  else(${CMAKE_VERSION} VERSION_LESS 2.8.5)
+-    set(Boost_ADDITIONAL_VERSIONS
+-      "@Boost_MAJOR_VERSION@.@Boost_MINOR_VERSION@.@Boost_SUBMINOR_VERSION@" "@Boost_MAJOR_VERSION@.@Boost_MINOR_VERSION@"
+-      "1.68.0" "1.68" "1.67.0" "1.67" "1.66.0" "1.66" "1.65.1" "1.65.0" "1.65"
+-      "1.64.0" "1.64" "1.63.0" "1.63" "1.62.0" "1.62" "1.61.0" "1.61" "1.60.0" "1.60"
+-      "1.59.0" "1.59" "1.58.0" "1.58" "1.57.0" "1.57" "1.56.0" "1.56" "1.55.0" "1.55"
+-      "1.54.0" "1.54" "1.53.0" "1.53" "1.52.0" "1.52" "1.51.0" "1.51"
+-      "1.50.0" "1.50" "1.49.0" "1.49" "1.48.0" "1.48" "1.47.0" "1.47")
+-  endif(${CMAKE_VERSION} VERSION_LESS 2.8.5)
++  endif()
++  set(Boost_ADDITIONAL_VERSIONS
++    "@Boost_MAJOR_VERSION@.@Boost_MINOR_VERSION@.@Boost_SUBMINOR_VERSION@" "@Boost_MAJOR_VERSION@.@Boost_MINOR_VERSION@"
++    "1.70.0" "1.70"
++    "1.69.0" "1.69" "1.68.0" "1.68" "1.67.0" "1.67" "1.66.0" "1.66" "1.65.1" "1.65.0" "1.65"
++    "1.64.0" "1.64" "1.63.0" "1.63" "1.62.0" "1.62" "1.61.0" "1.61" "1.60.0" "1.60"
++    "1.59.0" "1.59" "1.58.0" "1.58" "1.57.0" "1.57" "1.56.0" "1.56" "1.55.0" "1.55")
+   # Disable the config mode of find_package(Boost)
+   set(Boost_NO_BOOST_CMAKE ON)
+   find_package(Boost 1.40.0 ${QUIET_} COMPONENTS @PCLCONFIG_AVAILABLE_BOOST_MODULES@)
+diff --git a/cmake/pcl_find_boost.cmake b/cmake/pcl_find_boost.cmake
+index 6489f3954..43b07a97d 100644
+--- a/cmake/pcl_find_boost.cmake
++++ b/cmake/pcl_find_boost.cmake
+@@ -13,18 +13,11 @@ else(PCL_BUILD_WITH_BOOST_DYNAMIC_LINKING_WIN32 AND WIN32)
+   endif(NOT PCL_SHARED_LIBS OR WIN32)
+ endif(PCL_BUILD_WITH_BOOST_DYNAMIC_LINKING_WIN32 AND WIN32)
+ 
+-if(${CMAKE_VERSION} VERSION_LESS 2.8.5)
+-  set(Boost_ADDITIONAL_VERSIONS
+-    "1.47.0" "1.47" "1.46.1"
+-    "1.46.0" "1.46" "1.45.0" "1.45" "1.44.0" "1.44" "1.43.0" "1.43")
+-else(${CMAKE_VERSION} VERSION_LESS 2.8.5)
+-  set(Boost_ADDITIONAL_VERSIONS
+-    "1.68.0" "1.68" "1.67.0" "1.67" "1.66.0" "1.66" "1.65.1" "1.65.0" "1.65"
+-    "1.64.0" "1.64" "1.63.0" "1.63" "1.62.0" "1.62" "1.61.0" "1.61" "1.60.0" "1.60"
+-    "1.59.0" "1.59" "1.58.0" "1.58" "1.57.0" "1.57" "1.56.0" "1.56" "1.55.0" "1.55"
+-    "1.54.0" "1.54" "1.53.0" "1.53" "1.52.0" "1.52" "1.51.0" "1.51"
+-    "1.50.0" "1.50" "1.49.0" "1.49" "1.48.0" "1.48" "1.47.0" "1.47")
+-endif(${CMAKE_VERSION} VERSION_LESS 2.8.5)
++set(Boost_ADDITIONAL_VERSIONS
++  "1.70.0" "1.70"
++  "1.69.0" "1.69" "1.68.0" "1.68" "1.67.0" "1.67" "1.66.0" "1.66" "1.65.1" "1.65.0" "1.65"
++  "1.64.0" "1.64" "1.63.0" "1.63" "1.62.0" "1.62" "1.61.0" "1.61" "1.60.0" "1.60"
++  "1.59.0" "1.59" "1.58.0" "1.58" "1.57.0" "1.57" "1.56.0" "1.56" "1.55.0" "1.55")
+ 
+ # Disable the config mode of find_package(Boost)
+ set(Boost_NO_BOOST_CMAKE ON)
