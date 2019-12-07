@@ -44,7 +44,9 @@ class LibPCLConan(ConanFile):
         #     os.environ["CONAN_SYSREQUIRES_MODE"] = "verify"
         if self.settings.os == "Linux":
             self.options["Boost"].fPIC = True
-        # self.options["Boost"].shared=True
+
+        if tools.os_info.is_windows:
+            self.options["Boost"].shared=True
 
     def requirements(self):
         self.requires("qt/5.12.4-r2@camposs/stable")
