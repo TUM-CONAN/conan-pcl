@@ -15,12 +15,12 @@ class LibPCLConan(ConanFile):
     options = {
         "shared": [True, False],
         "fPIC": [True, False],
-        "cuda": ["9.2", "10.0", "10.1", "10.2", "None"]
+        "with_cuda": [True, False],
     }
     default_options = [
         "shared=True",
         "fPIC=True",
-        "cuda=None"
+        "with_cuda=True"
     ]
     default_options = tuple(default_options)
     exports = [
@@ -55,6 +55,7 @@ class LibPCLConan(ConanFile):
         if tools.os_info.is_windows:
             self.options["Boost"].shared=True
 
+
     def requirements(self):
         self.requires("ircad_common/1.0.2@camposs/stable")
         self.requires("qt/5.12.4-r2@camposs/stable")
@@ -66,6 +67,9 @@ class LibPCLConan(ConanFile):
 
         if tools.os_info.is_windows:
             self.requires("zlib/1.2.11@camposs/stable")
+
+        if self.options.with_cuda:
+            self.requires("cuda_dev_config/[>=1.0]@camposs/stable")
 
     def build_requirements(self):
         if tools.os_info.linux_distro == "linuxmint":
@@ -167,7 +171,7 @@ class LibPCLConan(ConanFile):
         cmake.definitions["BUILD_segmentation"] = "ON"
         cmake.definitions["BUILD_registration"] = "ON"
 
-        if self.options.cuda != "None":
+        if self.options.with_cuda:
             cmake.definitions["BUILD_CUDA"] = "ON"
             cmake.definitions["BUILD_GPU"] = "ON"
             cmake.definitions["BUILD_gpu_containers"] = "ON"
