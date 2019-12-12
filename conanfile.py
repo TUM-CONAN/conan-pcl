@@ -170,6 +170,7 @@ class LibPCLConan(ConanFile):
         if self.options.cuda != "None":
             cmake.definitions["BUILD_CUDA"] = "ON"
             cmake.definitions["BUILD_GPU"] = "ON"
+            cmake.definitions["BUILD_gpu_containers"] = "ON"
             cmake.definitions["BUILD_gpu_kinfu"] = "ON"
             cmake.definitions["BUILD_gpu_kinfu_large_scale"] = "ON"
             cmake.definitions["BUILD_visualization"] = "ON"
