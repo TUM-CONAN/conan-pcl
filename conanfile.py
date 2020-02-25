@@ -7,7 +7,7 @@ from conans import ConanFile, CMake, tools
 class LibPCLConan(ConanFile):
     name = "pcl"
     upstream_version = "1.9.1"
-    package_revision = "-r5"
+    package_revision = "-r6"
     version = "{0}{1}".format(upstream_version, package_revision)
 
     generators = "cmake"
@@ -63,7 +63,7 @@ class LibPCLConan(ConanFile):
         self.requires("Boost/1.70.0@camposs/stable")
         self.requires("vtk/8.2.0-r4@camposs/stable")
         self.requires("openni/2.2.0-r3@camposs/stable")
-        self.requires("flann/1.9.1-r2@camposs/stable")
+        self.requires("flann/1.9.1-r5@camposs/stable")
 
         if tools.os_info.is_windows:
             self.requires("zlib/1.2.11@camposs/stable")
