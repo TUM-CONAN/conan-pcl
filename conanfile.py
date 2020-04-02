@@ -6,8 +6,8 @@ from conans import ConanFile, CMake, tools
 
 class LibPCLConan(ConanFile):
     name = "pcl"
-    upstream_version = "1.9.1"
-    package_revision = "-r5"
+    upstream_version = "1.10.1"
+    package_revision = "-r1"
     version = "{0}{1}".format(upstream_version, package_revision)
 
     generators = "cmake"
@@ -24,13 +24,13 @@ class LibPCLConan(ConanFile):
     ]
     default_options = tuple(default_options)
     exports = [
-        "patches/clang_macos.diff",
-        "patches/kinfu.diff",
-        "patches/pcl_eigen.diff",
-        "patches/pcl_gpu_error.diff",
-        "patches/point_cloud.diff",
-        "patches/pcl_supervoxel_clustering.diff",
-        "patches/cmake_add_new_boost_versions.diff",
+        # "patches/clang_macos.diff",
+        # "patches/kinfu.diff",
+        # "patches/pcl_eigen.diff",
+        # "patches/pcl_gpu_error.diff",
+        # "patches/point_cloud.diff",
+        # "patches/pcl_supervoxel_clustering.diff",
+        # "patches/cmake_add_new_boost_versions.diff",
     ]
     url = "https://git.ircad.fr/conan/conan-pcl"
     license = "BSD License"
@@ -60,7 +60,7 @@ class LibPCLConan(ConanFile):
         self.requires("ircad_common/1.0.2@camposs/stable")
         self.requires("qt/5.12.4-r2@camposs/stable")
         self.requires("eigen/3.3.7@camposs/stable")
-        self.requires("Boost/1.70.0@camposs/stable")
+        self.requires("Boost/1.72.0@camposs/stable")
         self.requires("vtk/8.2.0-r4@camposs/stable")
         self.requires("openni/2.2.0-r3@camposs/stable")
         self.requires("flann/1.9.1-r2@camposs/stable")
@@ -98,37 +98,61 @@ class LibPCLConan(ConanFile):
     def build(self):
         pcl_source_dir = os.path.join(
             self.source_folder, self.source_subfolder)
-        tools.patch(pcl_source_dir, "patches/clang_macos.diff")
-        tools.patch(pcl_source_dir, "patches/kinfu.diff")
-        tools.patch(pcl_source_dir, "patches/pcl_eigen.diff")
-        tools.patch(pcl_source_dir, "patches/pcl_gpu_error.diff")
-        tools.patch(pcl_source_dir, "patches/point_cloud.diff")
-        tools.patch(pcl_source_dir, "patches/pcl_supervoxel_clustering.diff")
-        tools.patch(pcl_source_dir, "patches/cmake_add_new_boost_versions.diff")
+        # tools.patch(pcl_source_dir, "patches/clang_macos.diff")
+        # tools.patch(pcl_source_dir, "patches/kinfu.diff")
+        # tools.patch(pcl_source_dir, "patches/pcl_eigen.diff")
+        # tools.patch(pcl_source_dir, "patches/pcl_gpu_error.diff")
+        # tools.patch(pcl_source_dir, "patches/point_cloud.diff")
+        # tools.patch(pcl_source_dir, "patches/pcl_supervoxel_clustering.diff")
+        # tools.patch(pcl_source_dir, "patches/cmake_add_new_boost_versions.diff")
 
         # patch for cuda arch >7.0
 
-        for path, subdirs, names in os.walk(pcl_source_dir,):
-            for name in names:
-                if fnmatch(name, "*.cu"):
-                    wildcard_file = os.path.join(path, name)
+        # for path, subdirs, names in os.walk(pcl_source_dir,):
+        #     for name in names:
+        #         if fnmatch(name, "*.cu"):
+        #             wildcard_file = os.path.join(path, name)
 
-                    # Fix package_folder paths
-                    tools.replace_in_file(
-                        wildcard_file, "__all(", "__all_sync(0xFFFFFFFF,", strict=False)
-                    tools.replace_in_file(
-                        wildcard_file, "__any(", "__any_sync(0xFFFFFFFF,", strict=False)
-                    tools.replace_in_file(
-                        wildcard_file, "__ballot(",
-                        "__ballot_sync(0xFFFFFFFF,", strict=False)
+        #             # Fix package_folder paths
+        #             tools.replace_in_file(
+        #                 wildcard_file, "__all(", "__all_sync(0xFFFFFFFF,", strict=False)
+        #             tools.replace_in_file(
+        #                 wildcard_file, "__any(", "__any_sync(0xFFFFFFFF,", strict=False)
+        #             tools.replace_in_file(
+        #                 wildcard_file, "__ballot(",
+        #                 "__ballot_sync(0xFFFFFFFF,", strict=False)
 
         # Use our own FindFLANN which take care of conan..
-        os.remove(
-            os.path.join(
-                pcl_source_dir,
-                'cmake',
-                'Modules',
-                'FindFLANN.cmake'))
+        # os.remove(
+        #     os.path.join(
+        #         pcl_source_dir,
+        #         'cmake',
+        #         'Modules',
+        #         'FindFLANN.cmake'))
+
+        tools.replace_in_file(os.path.join(self.source_subfolder, "common", "include", "pcl", "pcl_macros.h"),
+            """
+  using uint8_t PCL_DEPRECATED("use std::uint8_t instead of pcl::uint8_t") = std::uint8_t;
+  using int8_t PCL_DEPRECATED("use std::int8_t instead of pcl::int8_t") = std::int8_t;
+  using uint16_t PCL_DEPRECATED("use std::uint16_t instead of pcl::uint16_t") = std::uint16_t;
+  using int16_t PCL_DEPRECATED("use std::uint16_t instead of pcl::int16_t") = std::int16_t;
+  using uint32_t PCL_DEPRECATED("use std::uint32_t instead of pcl::uint32_t") = std::uint32_t;
+  using int32_t PCL_DEPRECATED("use std::int32_t instead of pcl::int32_t") = std::int32_t;
+  using uint64_t PCL_DEPRECATED("use std::uint64_t instead of pcl::uint64_t") = std::uint64_t;
+  using int64_t PCL_DEPRECATED("use std::int64_t instead of pcl::int64_t") = std::int64_t;
+  using int_fast16_t PCL_DEPRECATED("use std::int_fast16_t instead of pcl::int_fast16_t") = std::int_fast16_t;
+""",
+            """
+  using uint8_t = std::uint8_t;
+  using int8_t = std::int8_t;
+  using uint16_t = std::uint16_t;
+  using int16_t = std::int16_t;
+  using uint32_t = std::uint32_t;
+  using int32_t = std::int32_t;
+  using uint64_t = std::uint64_t;
+  using int64_t = std::int64_t;
+  using int_fast16_t = std::int_fast16_t;
+""")
 
         # Import common flags and defines
         import common
