@@ -31,6 +31,7 @@ class LibPCLConan(ConanFile):
         "patches/point_cloud.diff",
         "patches/pcl_supervoxel_clustering.diff",
         "patches/cmake_add_new_boost_versions.diff",
+        "patches/frustum_culling.diff",
     ]
     url = "https://git.ircad.fr/conan/conan-pcl"
     license = "BSD License"
@@ -60,7 +61,7 @@ class LibPCLConan(ConanFile):
         self.requires("ircad_common/1.0.2@camposs/stable")
         self.requires("qt/5.12.4-r2@camposs/stable")
         self.requires("eigen/3.3.7@camposs/stable")
-        self.requires("Boost/1.70.0@camposs/stable")
+        self.requires("Boost/1.72.0@camposs/stable")
         self.requires("vtk/8.2.0-r4@camposs/stable")
         self.requires("openni/2.2.0-r3@camposs/stable")
         self.requires("flann/1.9.1-r5@camposs/stable")
@@ -105,6 +106,7 @@ class LibPCLConan(ConanFile):
         tools.patch(pcl_source_dir, "patches/point_cloud.diff")
         tools.patch(pcl_source_dir, "patches/pcl_supervoxel_clustering.diff")
         tools.patch(pcl_source_dir, "patches/cmake_add_new_boost_versions.diff")
+        tools.patch(pcl_source_dir, "patches/frustum_culling.diff")
 
         # patch for cuda arch >7.0
 
