@@ -7,7 +7,7 @@ from conans import ConanFile, CMake, tools
 class LibPCLConan(ConanFile):
     name = "pcl"
     upstream_version = "1.9.1"
-    package_revision = "-r5"
+    package_revision = "-r7"
     version = "{0}{1}".format(upstream_version, package_revision)
 
     generators = "cmake"
@@ -16,11 +16,15 @@ class LibPCLConan(ConanFile):
         "shared": [True, False],
         "fPIC": [True, False],
         "with_cuda": [True, False],
+        "with_visualization": [True, False],
+        "with_openni": [True, False],
     }
     default_options = [
         "shared=True",
         "fPIC=True",
-        "with_cuda=True"
+        "with_cuda=True",
+        "with_visualization=False",
+        "with_openni=False",
     ]
     default_options = tuple(default_options)
     exports = [
@@ -61,10 +65,12 @@ class LibPCLConan(ConanFile):
         self.requires("qt/5.12.4-r2@camposs/stable")
         self.requires("eigen/3.3.7@camposs/stable")
         self.requires("Boost/1.70.0@camposs/stable")
-        self.requires("vtk/8.2.0-r4@camposs/stable")
-        self.requires("openni/2.2.0-r3@camposs/stable")
         self.requires("flann/1.9.1-r2@camposs/stable")
-
+        if self.options.with_visualization:
+            self.requires("vtk/8.2.0-r4@camposs/stable")
+        if self.options.with_openni:
+            self.requires("openni/2.2.0-r3@camposs/stable")
+        
         if tools.os_info.is_windows:
             self.requires("zlib/1.2.11@camposs/stable")
 
@@ -143,8 +149,6 @@ class LibPCLConan(ConanFile):
 
         cmake = CMake(self)
 
-        cmake.definitions["BUILD_apps"] = "OFF"
-        cmake.definitions["BUILD_examples"] = "OFF"
         cmake.definitions["BUILD_common"] = "ON"
         cmake.definitions["BUILD_2d"] = "ON"
         cmake.definitions["BUILD_features"] = "ON"
@@ -155,29 +159,33 @@ class LibPCLConan(ConanFile):
         cmake.definitions["BUILD_octree"] = "ON"
         cmake.definitions["BUILD_sample_consensus"] = "ON"
         cmake.definitions["BUILD_search"] = "ON"
-        cmake.definitions["BUILD_tools"] = "OFF"
         cmake.definitions["PCL_BUILD_WITH_BOOST_DYNAMIC_LINKING_WIN32"] = "ON"
         cmake.definitions["PCL_SHARED_LIBS"] = "ON"
-        cmake.definitions["WITH_PCAP"] = "OFF"
-        cmake.definitions["WITH_DAVIDSDK"] = "OFF"
-        cmake.definitions["WITH_ENSENSO"] = "OFF"
-        cmake.definitions["WITH_OPENNI"] = "OFF"
-        cmake.definitions["WITH_OPENNI2"] = "OFF"
-        cmake.definitions["WITH_RSSDK"] = "OFF"
-        cmake.definitions["WITH_QHULL"] = "OFF"
-        cmake.definitions["BUILD_TESTS"] = "OFF"
         cmake.definitions["BUILD_ml"] = "ON"
-        cmake.definitions["BUILD_simulation"] = "OFF"
         cmake.definitions["BUILD_segmentation"] = "ON"
         cmake.definitions["BUILD_registration"] = "ON"
 
+        #disabled for now
+        cmake.definitions["BUILD_apps"] = "OFF"
+        cmake.definitions["BUILD_examples"] = "OFF"
+        cmake.definitions["WITH_PCAP"] = "OFF"
+        cmake.definitions["WITH_DAVIDSDK"] = "OFF"
+        cmake.definitions["WITH_ENSENSO"] = "OFF"
+        cmake.definitions["WITH_QHULL"] = "OFF"
+        cmake.definitions["BUILD_TESTS"] = "OFF"
+        cmake.definitions["BUILD_simulation"] = "OFF"
+        cmake.definitions["BUILD_tools"] = "OFF"
+        cmake.definitions["WITH_OPENNI"] = "OFF"
+        cmake.definitions["WITH_OPENNI2"] = "OFF"
+        cmake.definitions["WITH_RSSDK"] = "OFF"
+        
         if self.options.with_cuda:
             cmake.definitions["BUILD_CUDA"] = "ON"
             cmake.definitions["BUILD_GPU"] = "ON"
             cmake.definitions["BUILD_gpu_containers"] = "ON"
-            cmake.definitions["BUILD_gpu_kinfu"] = "ON"
-            cmake.definitions["BUILD_gpu_kinfu_large_scale"] = "ON"
-            cmake.definitions["BUILD_visualization"] = "ON"
+            cmake.definitions["BUILD_gpu_kinfu"] = "OFF"
+            cmake.definitions["BUILD_gpu_kinfu_large_scale"] = "OFF"
+            cmake.definitions["BUILD_visualization"] = "ON" if self.options.with_visualization else "OFF"
             cmake.definitions["BUILD_surface"] = "ON"
             cmake.definitions["CUDA_ARCH_BIN"] = ' '.join(
                 common.get_cuda_arch())
