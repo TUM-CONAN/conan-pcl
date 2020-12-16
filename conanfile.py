@@ -64,7 +64,7 @@ class LibPCLConan(ConanFile):
         self.requires("ircad_common/1.0.2@camposs/stable")
         self.requires("qt/5.12.4-r2@camposs/stable")
         self.requires("eigen/3.3.7@camposs/stable")
-        self.requires("Boost/1.70.0@camposs/stable")
+        self.requires("Boost/1.72.0@camposs/stable")
         self.requires("flann/1.9.1-r2@camposs/stable")
         if self.options.with_visualization:
             self.requires("vtk/8.2.0-r4@camposs/stable")
