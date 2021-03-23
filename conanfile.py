@@ -191,6 +191,8 @@ class LibPCLConan(ConanFile):
         cmake.definitions["BUILD_simulation"] = "OFF"
         cmake.definitions["BUILD_segmentation"] = "ON"
         cmake.definitions["BUILD_registration"] = "ON"
+        if tools.os_info.is_windows:
+            cmake.definitions["WITH_PNG"] = "OFF"
 
         if self.options.with_cuda:
             cmake.definitions["BUILD_CUDA"] = "ON"
