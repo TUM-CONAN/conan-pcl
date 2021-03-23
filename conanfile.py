@@ -63,6 +63,7 @@ class LibPCLConan(ConanFile):
         self.requires("eigen/3.3.9@camposs/stable")
         self.requires("Boost/1.75.0@camposs/stable")
         self.requires("flann/1.9.1-r6@camposs/stable")
+        self.requires("libpng/1.6.34-r4@camposs/stable")
         self.requires("zlib/1.2.11@camposs/stable")
 
         if self.options.with_cuda:
@@ -191,6 +192,8 @@ class LibPCLConan(ConanFile):
         cmake.definitions["BUILD_simulation"] = "OFF"
         cmake.definitions["BUILD_segmentation"] = "ON"
         cmake.definitions["BUILD_registration"] = "ON"
+        if tools.os_info.is_windows:
+            cmake.definitions["WITH_PNG"] = "OFF"
 
         if self.options.with_cuda:
             cmake.definitions["BUILD_CUDA"] = "ON"
