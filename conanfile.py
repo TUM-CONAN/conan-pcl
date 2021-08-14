@@ -56,7 +56,7 @@ class LibPCLConan(ConanFile):
         self.requires("qt/5.12.4-r5@camposs/stable")
         self.requires("eigen/3.3.9@camposs/stable")
         self.requires("Boost/1.75.0@camposs/stable")
-        self.requires("flann/1.9.1-r6@camposs/stable")
+        self.requires("flann/1.9.1-r7@camposs/stable")
         self.requires("zlib/1.2.11-r1@camposs/stable")
 
         if self.options.with_cuda:
