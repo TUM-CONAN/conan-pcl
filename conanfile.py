@@ -5,9 +5,11 @@ from conans import ConanFile, CMake, tools
 
 
 class LibPCLConan(ConanFile):
+    python_requires = "camp_common/[>=0.1]@camposs/stable"
+
     name = "pcl"
     upstream_version = "1.11.1"
-    package_revision = "-r1"
+    package_revision = "-r2"
     version = "{0}{1}".format(upstream_version, package_revision)
 
     generators = "cmake"
@@ -25,13 +27,6 @@ class LibPCLConan(ConanFile):
     default_options = tuple(default_options)
     exports = [
         "select_compute_arch.cmake",
-        # "patches/clang_macos.diff",
-        # "patches/kinfu.diff",
-        # "patches/pcl_eigen.diff",
-        # "patches/pcl_gpu_error.diff",
-        # "patches/point_cloud.diff",
-        # "patches/pcl_supervoxel_clustering.diff",
-        # "patches/cmake_add_new_boost_versions.diff",
     ]
     url = "https://git.ircad.fr/conan/conan-pcl"
     license = "BSD License"
@@ -58,7 +53,7 @@ class LibPCLConan(ConanFile):
 
 
     def requirements(self):
-        self.requires("ircad_common/1.0.3@camposs/stable")
+        self.requires("camp_common/[>=0.1]@camposs/stable")
         self.requires("qt/5.12.4-r4@camposs/stable")
         self.requires("eigen/3.3.9@camposs/stable")
         self.requires("Boost/1.75.0@camposs/stable")
@@ -66,7 +61,7 @@ class LibPCLConan(ConanFile):
         self.requires("zlib/1.2.11@camposs/stable")
 
         if self.options.with_cuda:
-            self.requires("cuda_dev_config/[1.1]@camposs/stable")
+            self.requires("cuda_dev_config/[>=2.0]@camposs/stable")
 
     def build_requirements(self):
         if tools.os_info.linux_distro == "linuxmint":
@@ -95,37 +90,6 @@ class LibPCLConan(ConanFile):
     def build(self):
         pcl_source_dir = os.path.join(
             self.source_folder, self.source_subfolder)
-        # tools.patch(pcl_source_dir, "patches/clang_macos.diff")
-        # tools.patch(pcl_source_dir, "patches/kinfu.diff")
-        # tools.patch(pcl_source_dir, "patches/pcl_eigen.diff")
-        # tools.patch(pcl_source_dir, "patches/pcl_gpu_error.diff")
-        # tools.patch(pcl_source_dir, "patches/point_cloud.diff")
-        # tools.patch(pcl_source_dir, "patches/pcl_supervoxel_clustering.diff")
-        # tools.patch(pcl_source_dir, "patches/cmake_add_new_boost_versions.diff")
-
-        # patch for cuda arch >7.0
-
-        # for path, subdirs, names in os.walk(pcl_source_dir,):
-        #     for name in names:
-        #         if fnmatch(name, "*.cu"):
-        #             wildcard_file = os.path.join(path, name)
-
-        #             # Fix package_folder paths
-        #             tools.replace_in_file(
-        #                 wildcard_file, "__all(", "__all_sync(0xFFFFFFFF,", strict=False)
-        #             tools.replace_in_file(
-        #                 wildcard_file, "__any(", "__any_sync(0xFFFFFFFF,", strict=False)
-        #             tools.replace_in_file(
-        #                 wildcard_file, "__ballot(",
-        #                 "__ballot_sync(0xFFFFFFFF,", strict=False)
-
-        # Use our own FindFLANN which take care of conan..
-        # os.remove(
-        #     os.path.join(
-        #         pcl_source_dir,
-        #         'cmake',
-        #         'Modules',
-        #         'FindFLANN.cmake'))
 
         tools.replace_in_file(os.path.join(self.source_subfolder, "common", "include", "pcl", "types.h"),
             """
@@ -152,7 +116,7 @@ class LibPCLConan(ConanFile):
 """)
 
         # Import common flags and defines
-        import common
+        common = self.python_requires["camp_common"].module
 
         # Generate Cmake wrapper
         common.generate_cmake_wrapper(
@@ -219,7 +183,7 @@ class LibPCLConan(ConanFile):
 
     def package(self):
         # Import common flags and defines
-        import common
+        common = self.python_requires["camp_common"].module
 
         common.fix_conan_path(self, self.package_folder, '*.cmake')
 
