@@ -9,7 +9,7 @@ class LibPCLConan(ConanFile):
 
     name = "pcl"
     upstream_version = "1.11.1"
-    package_revision = "-r2"
+    package_revision = "-r3"
     version = "{0}{1}".format(upstream_version, package_revision)
 
     generators = "cmake"
@@ -53,12 +53,11 @@ class LibPCLConan(ConanFile):
 
 
     def requirements(self):
-        self.requires("camp_common/[>=0.1]@camposs/stable")
-        self.requires("qt/5.12.4-r4@camposs/stable")
+        self.requires("qt/5.12.4-r5@camposs/stable")
         self.requires("eigen/3.3.9@camposs/stable")
         self.requires("Boost/1.75.0@camposs/stable")
         self.requires("flann/1.9.1-r6@camposs/stable")
-        self.requires("zlib/1.2.11@camposs/stable")
+        self.requires("zlib/1.2.11-r1@camposs/stable")
 
         if self.options.with_cuda:
             self.requires("cuda_dev_config/[>=2.0]@camposs/stable")
