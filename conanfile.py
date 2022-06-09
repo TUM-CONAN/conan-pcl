@@ -8,8 +8,8 @@ class LibPCLConan(ConanFile):
     python_requires = "camp_common/[>=0.1]@camposs/stable"
 
     name = "pcl"
-    upstream_version = "1.11.1"
-    package_revision = "-r3"
+    upstream_version = "1.12.1"
+    package_revision = ""
     version = "{0}{1}".format(upstream_version, package_revision)
 
     generators = "cmake"
@@ -53,14 +53,14 @@ class LibPCLConan(ConanFile):
 
 
     def requirements(self):
-        self.requires("qt/5.12.4-r5@camposs/stable")
-        self.requires("eigen/3.3.9@camposs/stable")
-        self.requires("Boost/1.75.0@camposs/stable")
+        self.requires("qt/5.15.4")
+        self.requires("eigen/3.3.9-r1@camposs/stable")
+        self.requires("Boost/1.75.0-r3@camposs/stable")
         self.requires("flann/1.9.1-r7@camposs/stable")
-        self.requires("zlib/1.2.11-r1@camposs/stable")
+        self.requires("zlib/1.2.12")
 
         if self.options.with_cuda:
-            self.requires("cuda_dev_config/[>=2.0]@camposs/stable")
+            self.requires("cuda_dev_config/2.0@camposs/stable")
 
     def build_requirements(self):
         if tools.os_info.linux_distro == "linuxmint":
@@ -89,30 +89,6 @@ class LibPCLConan(ConanFile):
     def build(self):
         pcl_source_dir = os.path.join(
             self.source_folder, self.source_subfolder)
-
-        tools.replace_in_file(os.path.join(self.source_subfolder, "common", "include", "pcl", "types.h"),
-            """
-  using uint8_t PCL_DEPRECATED(1, 12, "use std::uint8_t instead of pcl::uint8_t") = std::uint8_t;
-  using int8_t PCL_DEPRECATED(1, 12, "use std::int8_t instead of pcl::int8_t") = std::int8_t;
-  using uint16_t PCL_DEPRECATED(1, 12, "use std::uint16_t instead of pcl::uint16_t") = std::uint16_t;
-  using int16_t PCL_DEPRECATED(1, 12, "use std::uint16_t instead of pcl::int16_t") = std::int16_t;
-  using uint32_t PCL_DEPRECATED(1, 12, "use std::uint32_t instead of pcl::uint32_t") = std::uint32_t;
-  using int32_t PCL_DEPRECATED(1, 12, "use std::int32_t instead of pcl::int32_t") = std::int32_t;
-  using uint64_t PCL_DEPRECATED(1, 12, "use std::uint64_t instead of pcl::uint64_t") = std::uint64_t;
-  using int64_t PCL_DEPRECATED(1, 12, "use std::int64_t instead of pcl::int64_t") = std::int64_t;
-  using int_fast16_t PCL_DEPRECATED(1, 12, "use std::int_fast16_t instead of pcl::int_fast16_t") = std::int_fast16_t;
-""",
-            """
-  using uint8_t = std::uint8_t;
-  using int8_t = std::int8_t;
-  using uint16_t = std::uint16_t;
-  using int16_t = std::int16_t;
-  using uint32_t = std::uint32_t;
-  using int32_t = std::int32_t;
-  using uint64_t = std::uint64_t;
-  using int64_t = std::int64_t;
-  using int_fast16_t = std::int_fast16_t;
-""")
 
         # Import common flags and defines
         common = self.python_requires["camp_common"].module
@@ -164,9 +140,12 @@ class LibPCLConan(ConanFile):
             cmake.definitions["BUILD_gpu_kinfu"] = "OFF"
             cmake.definitions["BUILD_gpu_kinfu_large_scale"] = "OFF"
             cmake.definitions["BUILD_visualization"] = "OFF"
-            cmake.definitions["BUILD_surface"] = "ON"
-            cmake.definitions["CUDA_ARCH_BIN"] = ' '.join(
-                common.get_cuda_arch())
+            # disabled due to incompatible use of thrust namespace with cuda sdk >= 11.6
+            cmake.definitions["BUILD_cuda_sample_consensus"] = "OFF"
+            cmake.definitions["BUILD_cuda_io"] = "OFF"
+            cmake.definitions["BUILD_gpu_features"] = "OFF"
+            cmake.definitions["BUILD_gpu_octree"] = "OFF"
+            cmake.definitions["BUILD_surface"] = "OFF"
 
         if tools.os_info.is_macos:
             cmake.definitions["BUILD_gpu_features"] = "OFF"
