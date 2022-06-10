@@ -130,6 +130,8 @@ class LibPCLConan(ConanFile):
         cmake.definitions["BUILD_simulation"] = "OFF"
         cmake.definitions["BUILD_segmentation"] = "ON"
         cmake.definitions["BUILD_registration"] = "ON"
+        cmake.definitions["BUILD_surface"] = "ON"
+
         if tools.os_info.is_windows:
             cmake.definitions["WITH_PNG"] = "OFF"
 
@@ -145,7 +147,7 @@ class LibPCLConan(ConanFile):
             cmake.definitions["BUILD_cuda_io"] = "OFF"
             cmake.definitions["BUILD_gpu_features"] = "OFF"
             cmake.definitions["BUILD_gpu_octree"] = "OFF"
-            cmake.definitions["BUILD_surface"] = "OFF"
+            cmake.definitions["BUILD_gpu_surface"] = "OFF"
 
         if tools.os_info.is_macos:
             cmake.definitions["BUILD_gpu_features"] = "OFF"
