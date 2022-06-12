@@ -18,11 +18,13 @@ class LibPCLConan(ConanFile):
         "shared": [True, False],
         "fPIC": [True, False],
         "with_cuda": [True, False],
+        "with_qt": [True, False],
     }
     default_options = [
         "shared=True",
         "fPIC=True",
-        "with_cuda=True"
+        "with_cuda=True",
+        "with_qt=False",
     ]
     default_options = tuple(default_options)
     exports = [
@@ -103,6 +105,21 @@ class LibPCLConan(ConanFile):
 
         cmake = CMake(self)
 
+        cmake.definitions["PCL_BUILD_WITH_BOOST_DYNAMIC_LINKING_WIN32"] = "ON"
+        cmake.definitions["PCL_SHARED_LIBS"] = "ON"
+
+        cmake.definitions["WITH_PCAP"] = "OFF"
+        cmake.definitions["WITH_DAVIDSDK"] = "OFF"
+        cmake.definitions["WITH_ENSENSO"] = "OFF"
+        cmake.definitions["WITH_OPENNI"] = "OFF"
+        cmake.definitions["WITH_OPENNI2"] = "OFF"
+        cmake.definitions["WITH_RSSDK"] = "OFF"
+        cmake.definitions["WITH_QHULL"] = "OFF"
+        cmake.definitions["WITH_QT"] = "ON" if self.options.with_qt else "OFF"
+
+        if tools.os_info.is_windows:
+            cmake.definitions["WITH_PNG"] = "OFF"
+
         cmake.definitions["BUILD_apps"] = "OFF"
         cmake.definitions["BUILD_examples"] = "OFF"
         cmake.definitions["BUILD_common"] = "ON"
@@ -116,24 +133,12 @@ class LibPCLConan(ConanFile):
         cmake.definitions["BUILD_sample_consensus"] = "ON"
         cmake.definitions["BUILD_search"] = "ON"
         cmake.definitions["BUILD_tools"] = "OFF"
-        cmake.definitions["PCL_BUILD_WITH_BOOST_DYNAMIC_LINKING_WIN32"] = "ON"
-        cmake.definitions["PCL_SHARED_LIBS"] = "ON"
-        cmake.definitions["WITH_PCAP"] = "OFF"
-        cmake.definitions["WITH_DAVIDSDK"] = "OFF"
-        cmake.definitions["WITH_ENSENSO"] = "OFF"
-        cmake.definitions["WITH_OPENNI"] = "OFF"
-        cmake.definitions["WITH_OPENNI2"] = "OFF"
-        cmake.definitions["WITH_RSSDK"] = "OFF"
-        cmake.definitions["WITH_QHULL"] = "OFF"
         cmake.definitions["BUILD_TESTS"] = "OFF"
         cmake.definitions["BUILD_ml"] = "ON"
         cmake.definitions["BUILD_simulation"] = "OFF"
         cmake.definitions["BUILD_segmentation"] = "ON"
         cmake.definitions["BUILD_registration"] = "ON"
         cmake.definitions["BUILD_surface"] = "ON"
-
-        if tools.os_info.is_windows:
-            cmake.definitions["WITH_PNG"] = "OFF"
 
         if self.options.with_cuda:
             cmake.definitions["BUILD_CUDA"] = "ON"
