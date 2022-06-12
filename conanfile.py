@@ -107,6 +107,10 @@ class LibPCLConan(ConanFile):
                 endif (PCL_FORCE_CUDA_ARCH)
                 set(CUDA_ARCH_BIN ${__CUDA_ARCH_BIN} CACHE STRING "Specify 'real' GPU architectures to build binaries for")
                 """)
+        if tools.os_info.is_windows:
+            tools.replace_in_file(os.path.join(pcl_source_dir, "pcl", "CMakeLists.txt"),
+                """if("${CMAKE_CXX_FLAGS}" STREQUAL "${CMAKE_CXX_FLAGS_DEFAULT}")""",
+                """if("${CONAN_SETTINGS_OS}" STREQUAL "Windows" OR "${CMAKE_CXX_FLAGS}" STREQUAL "${CMAKE_CXX_FLAGS_DEFAULT}")""")
 
         # Import common flags and defines
         common = self.python_requires["camp_common"].module
