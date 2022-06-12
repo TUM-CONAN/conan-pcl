@@ -14,19 +14,23 @@ class LibPCLConan(ConanFile):
 
     generators = "cmake"
     settings = "os", "arch", "compiler", "build_type"
+
     options = {
         "shared": [True, False],
         "fPIC": [True, False],
         "with_cuda": [True, False],
+        "force_cuda_arch": "ANY",
         "with_qt": [True, False],
     }
-    default_options = [
-        "shared=True",
-        "fPIC=True",
-        "with_cuda=True",
-        "with_qt=False",
-    ]
-    default_options = tuple(default_options)
+
+    default_options = {
+        "shared":True,
+        "fPIC":True,
+        "with_cuda":True,
+        "force_cuda_arch":"",
+        "with_qt":False,
+    }
+
     exports = [
         "select_compute_arch.cmake",
     ]
@@ -93,6 +97,17 @@ class LibPCLConan(ConanFile):
         pcl_source_dir = os.path.join(
             self.source_folder, self.source_subfolder)
 
+        if self.options.force_cuda_arch:
+            tools.replace_in_file(os.path.join(pcl_source_dir, "cmake", "pcl_find_cuda.cmake"),
+                """set(CUDA_ARCH_BIN ${__CUDA_ARCH_BIN} CACHE STRING "Specify 'real' GPU architectures to build binaries for")""",
+                """
+                option(PCL_FORCE_CUDA_ARCH "Option to force CUDA Architectures to be built." "")
+                if (PCL_FORCE_CUDA_ARCH)
+                  set(__CUDA_ARCH_BIN ${PCL_FORCE_CUDA_ARCH})
+                endif (PCL_FORCE_CUDA_ARCH)
+                set(CUDA_ARCH_BIN ${__CUDA_ARCH_BIN} CACHE STRING "Specify 'real' GPU architectures to build binaries for")
+                """)
+
         # Import common flags and defines
         common = self.python_requires["camp_common"].module
 
@@ -107,7 +122,7 @@ class LibPCLConan(ConanFile):
         cmake = CMake(self)
 
         cmake.definitions["PCL_BUILD_WITH_BOOST_DYNAMIC_LINKING_WIN32"] = "ON"
-        cmake.definitions["PCL_SHARED_LIBS"] = "ON"
+        cmake.definitions["PCL_SHARED_LIBS"] = "ON" if self.options.shared else "OFF"
 
         cmake.definitions["WITH_PCAP"] = "OFF"
         cmake.definitions["WITH_DAVIDSDK"] = "OFF"
@@ -116,13 +131,12 @@ class LibPCLConan(ConanFile):
         cmake.definitions["WITH_OPENNI2"] = "OFF"
         cmake.definitions["WITH_RSSDK"] = "OFF"
         cmake.definitions["WITH_QHULL"] = "OFF"
+
         cmake.definitions["WITH_QT"] = "ON" if self.options.with_qt else "OFF"
 
         if tools.os_info.is_windows:
             cmake.definitions["WITH_PNG"] = "OFF"
 
-        cmake.definitions["BUILD_apps"] = "OFF"
-        cmake.definitions["BUILD_examples"] = "OFF"
         cmake.definitions["BUILD_common"] = "ON"
         cmake.definitions["BUILD_2d"] = "ON"
         cmake.definitions["BUILD_features"] = "ON"
@@ -133,19 +147,23 @@ class LibPCLConan(ConanFile):
         cmake.definitions["BUILD_octree"] = "ON"
         cmake.definitions["BUILD_sample_consensus"] = "ON"
         cmake.definitions["BUILD_search"] = "ON"
-        cmake.definitions["BUILD_tools"] = "OFF"
-        cmake.definitions["BUILD_TESTS"] = "OFF"
         cmake.definitions["BUILD_ml"] = "ON"
-        cmake.definitions["BUILD_simulation"] = "OFF"
         cmake.definitions["BUILD_segmentation"] = "ON"
         cmake.definitions["BUILD_registration"] = "ON"
         cmake.definitions["BUILD_surface"] = "ON"
+
+        cmake.definitions["BUILD_apps"] = "OFF"
+        cmake.definitions["BUILD_examples"] = "OFF"
+        cmake.definitions["BUILD_tools"] = "OFF"
+        cmake.definitions["BUILD_TESTS"] = "OFF"
+        cmake.definitions["BUILD_simulation"] = "OFF"
         cmake.definitions["BUILD_visualization"] = "OFF"
 
         if self.options.with_cuda:
             cmake.definitions["BUILD_CUDA"] = "ON"
             cmake.definitions["BUILD_GPU"] = "ON"
             cmake.definitions["BUILD_gpu_containers"] = "ON"
+
             cmake.definitions["BUILD_gpu_kinfu"] = "OFF"
             cmake.definitions["BUILD_gpu_kinfu_large_scale"] = "OFF"
             # disabled due to incompatible use of thrust namespace with cuda sdk >= 11.6
@@ -155,13 +173,17 @@ class LibPCLConan(ConanFile):
             cmake.definitions["BUILD_gpu_octree"] = "OFF"
             cmake.definitions["BUILD_gpu_surface"] = "OFF"
 
+            if self.options.force_cuda_arch:
+                forced_archs = filter(None, str(self.options.force_cuda_arch).split(","))
+                cmake.definitions["PCL_FORCE_CUDA_ARCH"] = ";".join(forced_archs)
+
         if tools.os_info.is_macos:
             cmake.definitions["BUILD_gpu_features"] = "OFF"
 
-        if tools.os_info.is_windows:
-            cmake.definitions["CUDA_PROPAGATE_HOST_FLAGS"] = "ON"
-        else:
-            cmake.definitions["CUDA_PROPAGATE_HOST_FLAGS"] = "OFF"
+        # if tools.os_info.is_windows:
+        #     cmake.definitions["CUDA_PROPAGATE_HOST_FLAGS"] = "ON"
+        # else:
+            # cmake.definitions["CUDA_PROPAGATE_HOST_FLAGS"] = "OFF"
 
         cmake.configure()
         cmake.build()
