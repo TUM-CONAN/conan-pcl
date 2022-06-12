@@ -116,7 +116,7 @@ class LibPCLConan(ConanFile):
             cmakelists_path='CMakeLists.txt',
             source_subfolder=self.source_subfolder,
             build_type=self.settings.build_type,
-            setup_cuda=self.options.with_cuda,
+            create_minimal_wrapper=True,
         )
 
         cmake = CMake(self)
