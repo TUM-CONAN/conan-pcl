@@ -55,7 +55,8 @@ class LibPCLConan(ConanFile):
 
 
     def requirements(self):
-        self.requires("qt/5.15.4")
+        if self.options.with_qt:
+            self.requires("qt/5.15.4")
         self.requires("eigen/3.3.9-r1@camposs/stable")
         self.requires("Boost/1.79.0@camposs/stable")
         self.requires("flann/1.9.1-r7@camposs/stable")
@@ -100,7 +101,7 @@ class LibPCLConan(ConanFile):
             cmakelists_path='CMakeLists.txt',
             source_subfolder=self.source_subfolder,
             build_type=self.settings.build_type,
-            setup_cuda=True
+            setup_cuda=self.options.with_cuda,
         )
 
         cmake = CMake(self)
@@ -139,6 +140,7 @@ class LibPCLConan(ConanFile):
         cmake.definitions["BUILD_segmentation"] = "ON"
         cmake.definitions["BUILD_registration"] = "ON"
         cmake.definitions["BUILD_surface"] = "ON"
+        cmake.definitions["BUILD_visualization"] = "OFF"
 
         if self.options.with_cuda:
             cmake.definitions["BUILD_CUDA"] = "ON"
@@ -146,7 +148,6 @@ class LibPCLConan(ConanFile):
             cmake.definitions["BUILD_gpu_containers"] = "ON"
             cmake.definitions["BUILD_gpu_kinfu"] = "OFF"
             cmake.definitions["BUILD_gpu_kinfu_large_scale"] = "OFF"
-            cmake.definitions["BUILD_visualization"] = "OFF"
             # disabled due to incompatible use of thrust namespace with cuda sdk >= 11.6
             cmake.definitions["BUILD_cuda_sample_consensus"] = "OFF"
             cmake.definitions["BUILD_cuda_io"] = "OFF"
