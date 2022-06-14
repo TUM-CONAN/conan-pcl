@@ -60,7 +60,7 @@ class LibPCLConan(ConanFile):
 
     def requirements(self):
         if self.options.with_qt:
-            self.requires("qt/5.15.4")
+            self.requires("qt/5.15.4@camposs/stable")
         self.requires("eigen/3.3.9-r1@camposs/stable")
         self.requires("Boost/1.79.0@camposs/stable")
         self.requires("flann/1.9.1-r7@camposs/stable")
