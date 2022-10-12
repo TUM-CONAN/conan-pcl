@@ -9,7 +9,7 @@ class LibPCLConan(ConanFile):
 
     name = "pcl"
     upstream_version = "1.12.1"
-    package_revision = ""
+    package_revision = "-r1"
     version = "{0}{1}".format(upstream_version, package_revision)
 
     generators = "cmake"
@@ -180,6 +180,10 @@ class LibPCLConan(ConanFile):
             if self.options.force_cuda_arch:
                 forced_archs = filter(None, str(self.options.force_cuda_arch).split(","))
                 cmake.definitions["PCL_FORCE_CUDA_ARCH"] = ";".join(forced_archs)
+        else:
+            cmake.definitions["BUILD_CUDA"] = "OFF"
+            cmake.definitions["BUILD_GPU"] = "OFF"
+            cmake.definitions["WITH_CUDA"] = "OFF"
 
         if tools.os_info.is_macos:
             cmake.definitions["BUILD_gpu_features"] = "OFF"
