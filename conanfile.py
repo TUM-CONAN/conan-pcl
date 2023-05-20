@@ -31,6 +31,7 @@ class LibPCLConan(ConanFile):
         "with_cuda": [True, False],
         "force_cuda_arch": ["ANY", ],
         "with_qt": [True, False],
+        "with_jpeg": [False, "libjpeg", "libjpeg-turbo", "mozjpeg"],
     }
 
     default_options = {
@@ -39,6 +40,7 @@ class LibPCLConan(ConanFile):
         "with_cuda": True,
         "force_cuda_arch": "",
         "with_qt": False,
+        "with_jpeg": "libjpeg",
     }
 
     exports = [
@@ -61,11 +63,10 @@ class LibPCLConan(ConanFile):
 
     def requirements(self):
         if self.options.with_qt:
-            self.requires("qt/6.5.0")
+            self.requires("qt/6.4.2")
         self.requires("eigen/3.4.0")
         self.requires("boost/1.81.0")
         self.requires("flann/1.9.2", transitive_headers=True, transitive_libs=True)
-        self.requires("zlib/1.2.13")
 
         if self.options.with_cuda:
             self.requires("cuda_dev_config/2.1@camposs/stable")
@@ -125,6 +126,7 @@ class LibPCLConan(ConanFile):
         tc.variables["BUILD_TESTS"] = "OFF"
         tc.variables["BUILD_simulation"] = "OFF"
         tc.variables["BUILD_visualization"] = "OFF"
+        tc.variables["WITH_VTK"] = "OFF"
 
         if self.options.with_cuda:
             tc.variables["BUILD_CUDA"] = "ON"
@@ -170,7 +172,7 @@ class LibPCLConan(ConanFile):
     def build(self):
 
         if self.options.force_cuda_arch:
-            tools.replace_in_file(os.path.join(source_subfolder, "cmake", "pcl_find_cuda.cmake"),
+            replace_in_file(self, os.path.join(self.source_folder, "cmake", "pcl_find_cuda.cmake"),
                 """set(CUDA_ARCH_BIN ${__CUDA_ARCH_BIN} CACHE STRING "Specify 'real' GPU architectures to build binaries for")""",
                 """
                 option(PCL_FORCE_CUDA_ARCH "Option to force CUDA Architectures to be built." "")
@@ -180,7 +182,7 @@ class LibPCLConan(ConanFile):
                 set(CUDA_ARCH_BIN ${__CUDA_ARCH_BIN} CACHE STRING "Specify 'real' GPU architectures to build binaries for")
                 """)
         if self.settings.os == "Windows":
-            tools.replace_in_file(os.path.join(source_subfolder, "CMakeLists.txt"),
+            replace_in_file(self, os.path.join(self.source_folder, "CMakeLists.txt"),
                 """if("${CMAKE_CXX_FLAGS}" STREQUAL "${CMAKE_CXX_FLAGS_DEFAULT}")""",
                 """if("${CONAN_SETTINGS_OS}" STREQUAL "Windows" OR "${CMAKE_CXX_FLAGS}" STREQUAL "${CMAKE_CXX_FLAGS_DEFAULT}")""")
 
@@ -192,7 +194,118 @@ class LibPCLConan(ConanFile):
         cmake = CMake(self)
         cmake.install()
 
+
+    @property
+    def _pcl_components(self):
+        def eigen():
+            return ["eigen::eigen"]
+
+        def boost():
+            return ["boost::boost"]
+
+        def cuda_sdk():
+            return ["cuda_dev_config::cuda_dev_config"] if self.options.with_cuda else []
+
+        pcl_components = [
+            {"target": "pcl_common",          "lib": "common",          "requires": boost() + eigen()},
+            {"target": "pcl_io_ply",          "lib": "io_ply",          "requires": ["pcl_common"] + boost() + eigen()},
+            {"target": "pcl_io",              "lib": "io",              "requires": ["pcl_common", "pcl_io_ply"] + boost() + eigen()},
+            {"target": "pcl_ml",              "lib": "ml",              "requires": ["pcl_common"] + eigen()},
+            {"target": "pcl_octree",          "lib": "octree",          "requires": ["pcl_common", "pcl_gpu_containers", "pcl_gpu_utils"] + eigen()},
+            {"target": "pcl_kdtree",          "lib": "kdtree",          "requires": ["pcl_common", "flann::flann"] + eigen()},
+            {"target": "pcl_search",          "lib": "search",          "requires": ["pcl_common", "pcl_kdtree", "pcl_octree"] + eigen()},
+            {"target": "pcl_sample_consensus","lib": "sample_consensus","requires": ["pcl_common", "pcl_search"] + eigen()},
+            {"target": "pcl_stereo",          "lib": "stereo",          "requires": ["pcl_common", "pcl_io"] + eigen()},
+            {"target": "pcl_surface",         "lib": "surface",         "requires": ["pcl_common", "pcl_search", "pcl_kdtree", "pcl_octree"] + eigen()},
+            {"target": "pcl_filters",         "lib": "filters",         "requires": ["pcl_common", "pcl_sample_consensus", "pcl_search", "pcl_kdtree", "pcl_octree"] + eigen()},
+            {"target": "pcl_2d",              "lib": None,              "requires": ["pcl_common", "pcl_filters"] + eigen()},
+            {"target": "pcl_geometry",        "lib": None,              "requires": ["pcl_common"] + eigen()},
+            {"target": "pcl_features",        "lib": "features",        "requires": ["pcl_common", "pcl_search", "pcl_kdtree", "pcl_octree", "pcl_filters", "pcl_2d"] + eigen()},
+            {"target": "pcl_segmentation",    "lib": "segmentation",    "requires": ["pcl_common", "pcl_geometry", "pcl_search", "pcl_sample_consensus", "pcl_kdtree", "pcl_octree", "pcl_features", "pcl_filters", "pcl_ml"] + eigen()},
+            {"target": "pcl_tracking",        "lib": "tracking",        "requires": ["pcl_common", "pcl_octree", "pcl_kdtree", "pcl_search", "pcl_sample_consensus", "pcl_features", "pcl_filters"] + eigen()},
+            {"target": "pcl_registration",    "lib": "registration",    "requires": ["pcl_common", "pcl_search", "pcl_kdtree", "pcl_octree", "pcl_filters", "pcl_2d"] + eigen()},
+            {"target": "pcl_keypoints",       "lib": "keypoints",       "requires": ["pcl_common", "pcl_search", "pcl_kdtree", "pcl_octree", "pcl_features", "pcl_filters"] + eigen()},
+            {"target": "pcl_recognition",     "lib": "recognition",     "requires": ["pcl_common", "pcl_io", "pcl_search", "pcl_kdtree", "pcl_octree", "pcl_features", "pcl_filters", "pcl_registration", "pcl_sample_consensus", "pcl_ml"] + eigen()},
+        ]
+
+        if self.options.with_cuda:
+            pcl_components.extend([
+            {"target": "pcl_gpu_containers",    "lib": "gpu_containers",    "requires": cuda_sdk()},
+            {"target": "pcl_gpu_utils",         "lib": "gpu_utils",         "requires": ["pcl_gpu_containers"]},
+            {"target": "pcl_cuda_features",     "lib": "cuda_features",     "requires": ["pcl_common", "pcl_io", "cuda_dev_config::cuda_dev_config"] + boost()},
+            {"target": "pcl_cuda_segmentation", "lib": "cuda_segmentation", "requires": ["cuda_dev_config::cuda_dev_config"] + boost()},
+            ])
+
+
+        return pcl_components
+
+
+
+    # def package_info(self):
+    #     self.cpp_info.libs = collect_libs(self)
+    #     v_major, v_minor, v_micro = self.upstream_version.split(".")
+    #     self.cpp_info.includedirs = ['include', os.path.join('include', 'pcl-%s.%s' % (v_major, v_minor) )]
+
+
+    @property
+    def _module_file_rel_path(self):
+        return os.path.join("lib", "cmake", f"conan-official-{self.name}-targets.cmake")
+
+
     def package_info(self):
-        self.cpp_info.libs = collect_libs(self)
-        v_major, v_minor, v_micro = self.upstream_version.split(".")
-        self.cpp_info.includedirs = ['include', os.path.join('include', 'pcl-%s.%s' % (v_major, v_minor) )]
+        version = self.version.split(".")
+        # version = "".join(version) if self.settings.os == "Windows" else ""
+        # debug = "d" if self.settings.build_type == "Debug" and self.settings.os == "Windows" else ""
+        debug = ""
+
+        def get_lib_name(module):
+            return f"pcl_{module}{debug}"
+
+        def add_components(components):
+            for component in components:
+                conan_component = component["target"]
+                cmake_target = component["target"]
+                cmake_component = component["lib"]
+                lib_name = None
+                if cmake_component is None:
+                    # header only library
+                    lib_name = None
+                else:
+
+                    lib_name = get_lib_name(component["lib"])
+                requires = component["requires"]
+                # TODO: we should also define COMPONENTS names of each target for find_package() but not possible yet in CMakeDeps
+                #       see https://github.com/conan-io/conan/issues/10258
+                self.cpp_info.components[conan_component].set_property("cmake_target_name", cmake_target)
+                if lib_name is not None:
+                    self.cpp_info.components[conan_component].libs = [lib_name]
+                # if self.settings.os != "Windows":
+                self.cpp_info.components[conan_component].includedirs.append(os.path.join("include", "pcl-{}.{}".format(version[0], version[1])))
+                self.cpp_info.components[conan_component].requires = requires
+                # if self.settings.os == "Linux":
+                #     self.cpp_info.components[conan_component].system_libs = ["dl", "m", "pthread", "rt"]
+
+                # if conan_component == "opencv_core" and not self.options.shared:
+                #     lib_exclude_filter = "(opencv_|ippi|correspondence|multiview|numeric).*"
+                #     libs = list(filter(lambda x: not re.match(lib_exclude_filter, x), collect_libs(self)))
+                #     self.cpp_info.components[conan_component].libs += libs
+
+                # # TODO: to remove in conan v2 once cmake_find_package* generators removed
+                # self.cpp_info.components[conan_component].names["cmake_find_package"] = cmake_target
+                # self.cpp_info.components[conan_component].names["cmake_find_package_multi"] = cmake_target
+                # self.cpp_info.components[conan_component].build_modules["cmake_find_package"] = [self._module_file_rel_path]
+                # self.cpp_info.components[conan_component].build_modules["cmake_find_package_multi"] = [self._module_file_rel_path]
+                # if cmake_component != cmake_target:
+                #     conan_component_alias = conan_component + "_alias"
+                #     self.cpp_info.components[conan_component_alias].names["cmake_find_package"] = cmake_component
+                #     self.cpp_info.components[conan_component_alias].names["cmake_find_package_multi"] = cmake_component
+                #     self.cpp_info.components[conan_component_alias].requires = [conan_component]
+                #     self.cpp_info.components[conan_component_alias].bindirs = []
+                #     self.cpp_info.components[conan_component_alias].includedirs = []
+                #     self.cpp_info.components[conan_component_alias].libdirs = []
+
+        self.cpp_info.set_property("cmake_file_name", "PCL")
+
+        add_components(self._pcl_components)
+
+        self.cpp_info.includedirs.append(os.path.join("include", "pcl-{}.{}".format(version[0], version[1])))
