@@ -31,7 +31,6 @@ class LibPCLConan(ConanFile):
         "with_cuda": [True, False],
         "force_cuda_arch": ["ANY", ],
         "with_qt": [True, False],
-        "with_jpeg": [False, "libjpeg", "libjpeg-turbo", "mozjpeg"],
     }
 
     default_options = {
@@ -40,7 +39,6 @@ class LibPCLConan(ConanFile):
         "with_cuda": True,
         "force_cuda_arch": "",
         "with_qt": False,
-        "with_jpeg": "libjpeg",
     }
 
     exports = [
