@@ -159,9 +159,12 @@ class LibPCLConan(ConanFile):
         deps.set_property("flann", "cmake_find_mode", "module")
         deps.set_property("flann", "cmake_file_name", "FLANN")
         deps.set_property("flann", "cmake_target_name", "FLANN::FLANN")
-        deps.set_property("boost", "cmake_find_mode", "config")
+        deps.set_property("boost", "cmake_find_mode", "module")
         deps.set_property("boost", "cmake_file_name", "Boost")
-        deps.set_property("boost", "cmake_target_name", "Boost::boost")
+        deps.set_property("boost", "cmake_target_name", "boost")
+        deps.set_property("eigen", "cmake_find_mode", "module")
+        deps.set_property("eigen", "cmake_file_name", "Eigen")
+        deps.set_property("eigen", "cmake_target_name", "eigen")
         deps.generate()
 
     def layout(self):
