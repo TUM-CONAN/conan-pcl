@@ -65,6 +65,7 @@ class LibPCLConan(ConanFile):
         self.requires("eigen/3.4.0")
         self.requires("boost/1.81.0")
         self.requires("flann/1.9.2", transitive_headers=True, transitive_libs=True)
+        # self.requires("lz4/1.9.4")
 
         if self.options.with_cuda:
             self.requires("cuda_dev_config/2.1@camposs/stable")
@@ -156,12 +157,14 @@ class LibPCLConan(ConanFile):
         tc.generate()
 
         deps = CMakeDeps(self)
-        deps.set_property("flann", "cmake_find_mode", "module")
+        deps.set_property("flann", "cmake_find_mode", "config")
         deps.set_property("flann", "cmake_file_name", "FLANN")
         deps.set_property("flann", "cmake_target_name", "FLANN::FLANN")
-        deps.set_property("boost", "cmake_find_mode", "module")
+
+        deps.set_property("boost", "cmake_find_mode", "config")
         deps.set_property("boost", "cmake_file_name", "Boost")
-        deps.set_property("boost", "cmake_target_name", "boost")
+        deps.set_property("boost", "cmake_target_name", "Boost")
+
         deps.set_property("eigen", "cmake_find_mode", "module")
         deps.set_property("eigen", "cmake_file_name", "Eigen")
         deps.set_property("eigen", "cmake_target_name", "eigen")
@@ -171,6 +174,22 @@ class LibPCLConan(ConanFile):
         cmake_layout(self, src_folder="source_folder")
 
     def build(self):
+
+        # problem with transitive linking / rpath in conan 2.0.x
+        replace_in_file(self, os.path.join(self.source_folder, "cmake", "pcl_find_boost.cmake"),
+            "set(BOOST_REQUIRED_MODULES filesystem iostreams system)",
+            "set(BOOST_REQUIRED_MODULES headers filesystem iostreams system)")
+        replace_in_file(self, os.path.join(self.source_folder, "cmake", "pcl_find_boost.cmake"),
+            "find_package(Boost 1.65.0 QUIET COMPONENTS serialization mpi)",
+            "find_package(Boost 1.81.0 QUIET CONFIG COMPONENTS serialization mpi)")
+        replace_in_file(self, os.path.join(self.source_folder, "cmake", "pcl_find_boost.cmake"),
+            "find_package(Boost 1.65.0 REQUIRED COMPONENTS ${BOOST_REQUIRED_MODULES})",
+            """find_package(Boost 1.81.0 REQUIRED CONFIG COMPONENTS ${BOOST_REQUIRED_MODULES})\nmessage(STATUS "Boost Include: ${Boost_INCLUDE_DIR}")\ninclude_directories(${Boost_INCLUDE_DIR})""")
+
+
+        replace_in_file(self, os.path.join(self.source_folder, "CMakeLists.txt"),
+            "find_package(FLANN 1.9.1 REQUIRED)",
+            """find_package(FLANN 1.9.1 REQUIRED CONFIG)""")
 
         if self.options.force_cuda_arch:
             replace_in_file(self, os.path.join(self.source_folder, "cmake", "pcl_find_cuda.cmake"),
@@ -182,10 +201,17 @@ class LibPCLConan(ConanFile):
                 endif (PCL_FORCE_CUDA_ARCH)
                 set(CUDA_ARCH_BIN ${__CUDA_ARCH_BIN} CACHE STRING "Specify 'real' GPU architectures to build binaries for")
                 """)
+
         if self.settings.os == "Windows":
             replace_in_file(self, os.path.join(self.source_folder, "CMakeLists.txt"),
                 """if("${CMAKE_CXX_FLAGS}" STREQUAL "${CMAKE_CXX_FLAGS_DEFAULT}")""",
                 """if("${CONAN_SETTINGS_OS}" STREQUAL "Windows" OR "${CMAKE_CXX_FLAGS}" STREQUAL "${CMAKE_CXX_FLAGS_DEFAULT}")""")
+
+
+
+
+
+
 
         cmake = CMake(self)
         cmake.configure()
@@ -201,6 +227,9 @@ class LibPCLConan(ConanFile):
         def eigen():
             return ["eigen::eigen"]
 
+        def flann():
+            return ["flann::flasnn"] # + ["lz4:lz4"]
+
         def boost():
             return ["boost::boost"]
 
@@ -213,7 +242,7 @@ class LibPCLConan(ConanFile):
             {"target": "pcl_io",              "lib": "io",              "requires": ["pcl_common", "pcl_io_ply"] + boost() + eigen()},
             {"target": "pcl_ml",              "lib": "ml",              "requires": ["pcl_common"] + eigen()},
             {"target": "pcl_octree",          "lib": "octree",          "requires": ["pcl_common", "pcl_gpu_containers", "pcl_gpu_utils"] + eigen()},
-            {"target": "pcl_kdtree",          "lib": "kdtree",          "requires": ["pcl_common", "flann::flann"] + eigen()},
+            {"target": "pcl_kdtree",          "lib": "kdtree",          "requires": ["pcl_common"] + flann() + eigen()},
             {"target": "pcl_search",          "lib": "search",          "requires": ["pcl_common", "pcl_kdtree", "pcl_octree"] + eigen()},
             {"target": "pcl_sample_consensus","lib": "sample_consensus","requires": ["pcl_common", "pcl_search"] + eigen()},
             {"target": "pcl_stereo",          "lib": "stereo",          "requires": ["pcl_common", "pcl_io"] + eigen()},
