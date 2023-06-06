@@ -228,7 +228,7 @@ class LibPCLConan(ConanFile):
             return ["eigen::eigen"]
 
         def flann():
-            return ["flann::flasnn"] # + ["lz4:lz4"]
+            return ["flann::flann"] # + ["lz4:lz4"]
 
         def boost():
             return ["boost::boost"]
