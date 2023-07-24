@@ -206,6 +206,22 @@ class LibPCLConan(ConanFile):
             replace_in_file(self, os.path.join(self.source_folder, "CMakeLists.txt"),
                 """if("${CMAKE_CXX_FLAGS}" STREQUAL "${CMAKE_CXX_FLAGS_DEFAULT}")""",
                 """if("${CONAN_SETTINGS_OS}" STREQUAL "Windows" OR "${CMAKE_CXX_FLAGS}" STREQUAL "${CMAKE_CXX_FLAGS_DEFAULT}")""")
+            replace_in_file(self, os.path.join(self.source_folder, "CMakeLists.txt"),
+                """set(CMAKE_CXX_STANDARD 14 CACHE STRING "The target C++ standard. PCL requires C++14 or higher.")""",
+                """if(DEFINED ENV{CMAKE_CXX_STANDARD})
+                        set(CMAKE_CXX_STANDARD $ENV{CMAKE_CXX_STANDARD})
+                   else()
+                        set(CMAKE_CXX_STANDARD 14 CACHE STRING "The target C++ standard. PCL requires C++14 or higher.")
+                   endif()
+                """)
+            replace_in_file(self, os.path.join(self.source_folder, "CMakeLists.txt"),
+                """set(CMAKE_CUDA_STANDARD 14 CACHE STRING "The target CUDA/C++ standard. PCL requires CUDA/C++ 14 or higher.")""",
+                """if(DEFINED ENV{CMAKE_CUDA_STANDARD})
+                        set(CMAKE_CUDA_STANDARD $ENV{CMAKE_CUDA_STANDARD})
+                   else()
+                        set(CMAKE_CUDA_STANDARD 14 CACHE STRING "The target CUDA/C++ standard. PCL requires CUDA/C++ 14 or higher.")
+                   endif()
+                """)
 
 
 
@@ -285,8 +301,8 @@ class LibPCLConan(ConanFile):
     def package_info(self):
         version = self.version.split(".")
         # version = "".join(version) if self.settings.os == "Windows" else ""
-        # debug = "d" if self.settings.build_type == "Debug" and self.settings.os == "Windows" else ""
-        debug = ""
+        debug = "d" if self.settings.build_type == "Debug" and self.settings.os == "Windows" else ""
+        #debug = ""
 
         def get_lib_name(module):
             return f"pcl_{module}{debug}"
