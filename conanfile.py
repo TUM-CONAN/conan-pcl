@@ -17,7 +17,7 @@ class LibPCLConan(ConanFile):
 
     name = "pcl"
     upstream_version = "1.13.1"
-    package_revision = ""
+    package_revision = "r1"
     version = "{0}{1}".format(upstream_version, package_revision)
 
     url = "https://github.com/TUM-CONAN/conan-pcl"
@@ -63,9 +63,9 @@ class LibPCLConan(ConanFile):
 
     def requirements(self):
         if self.options.with_qt:
-            self.requires("qt/6.4.2")
+            self.requires("qt/6.5.3@camposs/stable")
         self.requires("eigen/3.4.0")
-        self.requires("boost/1.81.0")
+        self.requires("boost/[>=1.81.0]")
         self.requires("flann/1.9.2", transitive_headers=True, transitive_libs=True)
 
         if self.options.with_cuda:
