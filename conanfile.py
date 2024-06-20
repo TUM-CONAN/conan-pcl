@@ -301,13 +301,15 @@ class LibPCLConan(ConanFile):
     def package_info(self):
         version = self.version.split(".")
         # version = "".join(version) if self.settings.os == "Windows" else ""
-        debug = "d" if self.settings.build_type == "Debug" and self.settings.os == "Windows" else ""
+        debug = "d" if self.settings.build_type == "Debug" and (self.settings.os == "Windows" or self.settings.os == "WindowsStore") else ""
         #debug = ""
 
         def get_lib_name(module):
             return f"pcl_{module}{debug}"
 
         def add_components(components):
+            own_libs = ["pcl_{0}".format(c["lib"]) for c in components if c["lib"] is not None]
+
             for component in components:
                 conan_component = component["target"]
                 cmake_target = component["target"]
@@ -327,7 +329,7 @@ class LibPCLConan(ConanFile):
                     self.cpp_info.components[conan_component].libs = [lib_name]
                 # if self.settings.os != "Windows":
                 self.cpp_info.components[conan_component].includedirs.append(os.path.join("include", "pcl-{}.{}".format(version[0], version[1])))
-                self.cpp_info.components[conan_component].requires = requires
+                self.cpp_info.components[conan_component].requires = [(get_lib_name(r) if r in own_libs else r) for r in requires]
                 # if self.settings.os == "Linux":
                 #     self.cpp_info.components[conan_component].system_libs = ["dl", "m", "pthread", "rt"]
 
