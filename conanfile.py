@@ -327,7 +327,7 @@ class LibPCLConan(ConanFile):
                     self.cpp_info.components[conan_component].libs = [lib_name]
                 # if self.settings.os != "Windows":
                 self.cpp_info.components[conan_component].includedirs.append(os.path.join("include", "pcl-{}.{}".format(version[0], version[1])))
-                self.cpp_info.components[conan_component].requires = [(get_lib_name(r[4:]) if r.startswith("pcl_") else r) for r in requires]
+                self.cpp_info.components[conan_component].requires = requires
                 # if self.settings.os == "Linux":
                 #     self.cpp_info.components[conan_component].system_libs = ["dl", "m", "pthread", "rt"]
 
