@@ -142,10 +142,10 @@ class LibPCLConan(ConanFile):
             tc.variables["BUILD_gpu_surface"] = "OFF"
             if self.options.force_cuda_arch:
                 forced_archs = filter(None, str(self.options.force_cuda_arch).split(","))
-                tc.variables["PCL_FORCE_CUDA_ARCH"] = ";".join(forced_archs)
+                tc.variables["CMAKE_CUDA_ARCHITECTURES"] = ";".join(forced_archs)
             else:
                 if self.dependencies["cuda_dev_config"].options.cuda_archs:
-                    tc.variables["PCL_FORCE_CUDA_ARCH"] = ";".join(str(self.dependencies["cuda_dev_config"].options.cuda_archs).split(","))
+                    tc.variables["CMAKE_CUDA_ARCHITECTURES"] = ";".join(str(self.dependencies["cuda_dev_config"].options.cuda_archs).split(","))
         else:
             tc.variables["BUILD_CUDA"] = "OFF"
             tc.variables["BUILD_GPU"] = "OFF"
