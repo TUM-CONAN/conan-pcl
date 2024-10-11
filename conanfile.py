@@ -16,7 +16,7 @@ class LibPCLConan(ConanFile):
     python_requires = "camp_common/[>=0.1]@camposs/stable"
 
     name = "pcl"
-    upstream_version = "1.13.1"
+    upstream_version = "1.14.1"
     package_revision = ""
     version = "{0}{1}".format(upstream_version, package_revision)
 
@@ -68,7 +68,7 @@ class LibPCLConan(ConanFile):
         # self.requires("lz4/1.9.4")
 
         if self.options.with_cuda:
-            self.requires("cuda_dev_config/2.1@camposs/stable")
+            self.requires("cuda_dev_config/2.2@camposs/stable")
 
     def source(self):
         get(self,
@@ -143,6 +143,9 @@ class LibPCLConan(ConanFile):
             if self.options.force_cuda_arch:
                 forced_archs = filter(None, str(self.options.force_cuda_arch).split(","))
                 tc.variables["PCL_FORCE_CUDA_ARCH"] = ";".join(forced_archs)
+            else:
+                if self.dependencies["cuda_dev_config"].options.cuda_archs:
+                    tc.variables["PCL_FORCE_CUDA_ARCH"] = ";".join(str(self.dependencies["cuda_dev_config"].options.cuda_archs).split(","))
         else:
             tc.variables["BUILD_CUDA"] = "OFF"
             tc.variables["BUILD_GPU"] = "OFF"
@@ -179,16 +182,26 @@ class LibPCLConan(ConanFile):
         replace_in_file(self, os.path.join(self.source_folder, "cmake", "pcl_find_boost.cmake"),
             "set(BOOST_REQUIRED_MODULES filesystem iostreams system)",
             "set(BOOST_REQUIRED_MODULES headers filesystem iostreams system)")
+
         replace_in_file(self, os.path.join(self.source_folder, "cmake", "pcl_find_boost.cmake"),
-            "find_package(Boost 1.65.0 QUIET COMPONENTS serialization mpi)",
-            "find_package(Boost 1.81.0 QUIET CONFIG COMPONENTS serialization mpi)")
+            "find_package(Boost 1.65.0 QUIET COMPONENTS ${BOOST_OPTIONAL_MODULES})",
+            "find_package(Boost 1.65.0 QUIET CONFIG COMPONENTS ${BOOST_OPTIONAL_MODULES})")
+
         replace_in_file(self, os.path.join(self.source_folder, "cmake", "pcl_find_boost.cmake"),
             "find_package(Boost 1.65.0 REQUIRED COMPONENTS ${BOOST_REQUIRED_MODULES})",
-            """find_package(Boost 1.81.0 REQUIRED CONFIG COMPONENTS ${BOOST_REQUIRED_MODULES})\nmessage(STATUS "Boost Include: ${Boost_INCLUDE_DIR}")\ninclude_directories(${Boost_INCLUDE_DIR})""")
+            """find_package(Boost 1.65.0 REQUIRED CONFIG COMPONENTS ${BOOST_REQUIRED_MODULES})""")
+
+        replace_in_file(self, os.path.join(self.source_folder, "CMakeLists.txt"),
+            "find_package(Eigen3 3.3 REQUIRED NO_MODULE)",
+            """find_package(Eigen REQUIRED)
+               if(NOT EIGEN3_FOUND AND Eigen_FOUND)
+                  set(EIGEN3_FOUND ${Eigen_FOUND})
+               endif()
+            """)
 
 
         replace_in_file(self, os.path.join(self.source_folder, "CMakeLists.txt"),
-            "find_package(FLANN 1.9.1 REQUIRED)",
+            "find_package(FLANN 1.9.1)",
             """find_package(FLANN 1.9.1 REQUIRED CONFIG)""")
 
         if self.options.force_cuda_arch:
