@@ -146,6 +146,9 @@ class LibPCLConan(ConanFile):
             else:
                 if self.dependencies["cuda_dev_config"].options.cuda_archs:
                     tc.variables["CMAKE_CUDA_ARCHITECTURES"] = ";".join(str(self.dependencies["cuda_dev_config"].options.cuda_archs).split(","))
+            # @todo: this is a hack to make cuda compile
+            if is_msvc(self) and "vs_runtime" in tc.blocks.keys():
+                tc.blocks.remove("vs_runtime")
         else:
             tc.variables["BUILD_CUDA"] = "OFF"
             tc.variables["BUILD_GPU"] = "OFF"
